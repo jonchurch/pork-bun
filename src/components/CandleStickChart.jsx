@@ -24,6 +24,8 @@ import { fitWidth } from "react-stockcharts/lib/helper";
 import { last } from "react-stockcharts/lib/utils";
 import { discontinuousTimeScaleProvider } from "react-stockcharts/lib/scale";
 
+const RED = "#ef5350"
+const GREEN = "#48a69a"
 
 class CandleStickChartForContinuousIntraDay extends React.Component {
   render() {
@@ -39,7 +41,8 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 
     // const xAccessor = d => d.date;
 	  const start = xAccessor(last(data));
-	  const n = Math.max(0, data.length - 289)
+	  const offset = 180
+	  const n = Math.max(0, data.length - offset)
     const end = xAccessor(data[n]);
     const xExtents = [start, end];
 
@@ -71,7 +74,13 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
             orient="left"
             displayFormat={format(".2f")} />
 
-          <CandlestickSeries />
+		<CandlestickSeries 
+			stroke={"none"}
+			wickStroke={d => d.close > d.open ? RED : GREEN}
+			fill={d => d.close > d.open ? RED : GREEN }
+			opacity={1}
+			widthRatio={0.8}
+		/>
         </Chart>
         <CrossHairCursor />
       </ChartCanvas>
