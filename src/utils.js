@@ -16,11 +16,25 @@ function parseData(parse) {
 
 const parseDateTime = timeParse("%Y-%m-%d %H:%M:%S");
 
+const BASE_URL = "https://min-api.cryptocompare.com/data/histominute"
+
 export function getData() {
 	const promiseIntraDayContinuous = 
-		fetch("https://cdn.rawgit.com/rrag/react-stockcharts/master/docs/data/bitfinex_xbtusd_1m.csv")
-		.then(response => response.text())
-		.then(data => csvParse(data, parseData(parseDateTime)))
+		fetch(`${BASE_URL}?fsym=BTC&tsym=USD&aggregate=15`)
+		.then(response => response.json())
+		.then(({Data: data}) => {
+			const parsed = data.map(datum => {
+				return {
+					date: new Date(datum.time * 1000),
+					high: datum.high,
+					low: datum.low,
+					open: datum.open,
+					close: datum.close,
+					volume: datum.to
+				}
+			})
+			return parsed
+		})
 		.then(data => {
 			data.sort((a, b) => {
 				return a.date.valueOf() - b.date.valueOf();
