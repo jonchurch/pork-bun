@@ -27,7 +27,7 @@ import { discontinuousTimeScaleProvider } from "react-stockcharts/lib/scale";
 
 class CandleStickChartForContinuousIntraDay extends React.Component {
   render() {
-	  const { type, data: initialData, width, ratio } = this.props;
+	  const { type, data: initialData, width, height, ratio } = this.props;
 	  const xScaleProvider = discontinuousTimeScaleProvider
 		  .inputDateAccessor(d => d.date)
 	  const {
@@ -39,14 +39,12 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 
     // const xAccessor = d => d.date;
 	  const start = xAccessor(last(data));
-	  console.log(start)
-	  const n = Math.max(0, data.length - 250)
-	  console.log(n)
+	  const n = Math.max(0, data.length - 289)
     const end = xAccessor(data[n]);
     const xExtents = [start, end];
 
     return (
-      <ChartCanvas height={400}
+      <ChartCanvas height={height}
           ratio={ratio}
           width={width}
           margin={{ left: 80, right: 80, top: 10, bottom: 30 }}
@@ -64,21 +62,16 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
           <YAxis axisAt="left" orient="left" ticks={5} />
 
           <MouseCoordinateX
-            rectWidth={60}
+            rectWidth={80}
             at="bottom"
             orient="bottom"
-            displayFormat={timeFormat("%d-%m %H:%M:%S")} />
+            displayFormat={timeFormat("%d/%m %H:%M")} />
           <MouseCoordinateY
             at="left"
             orient="left"
             displayFormat={format(".2f")} />
 
           <CandlestickSeries />
-
-          <EdgeIndicator itemType="last" orient="right" edgeAt="right"
-            yAccessor={d => d.close} fill={d => d.close > d.open ? "#6BA583" : "#FF0000"}/>
-
-          <OHLCTooltip origin={[-40, 0]} xDisplayFormat={timeFormat("%Y-%m-%d %H:%M:%S")}/>
         </Chart>
         <CrossHairCursor />
       </ChartCanvas>

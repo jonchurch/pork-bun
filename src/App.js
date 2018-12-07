@@ -19,6 +19,8 @@ class App extends Component {
     return (
       <div className="App">
 		<CandleStickChart 
+			height={500}
+			width={1440}
 			data={this.state.data}
 		/>
       </div>
