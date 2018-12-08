@@ -76,8 +76,8 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 
 		<CandlestickSeries 
 			stroke={"none"}
-			wickStroke={d => d.close > d.open ? RED : GREEN}
-			fill={d => d.close > d.open ? RED : GREEN }
+			wickStroke={d => d.close > d.open ? GREEN : RED }
+			fill={d => d.close > d.open ? GREEN : RED }
 			opacity={1}
 			widthRatio={0.8}
 		/>
