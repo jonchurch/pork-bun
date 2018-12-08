@@ -12,7 +12,8 @@ import {
 import { XAxis, YAxis } from "react-stockcharts/lib/axes";
 import {
   CrossHairCursor,
-  MouseCoordinateX,
+	MouseCoordinateX,
+	EdgeIndicator,
   MouseCoordinateY,
 } from "react-stockcharts/lib/coordinates";
 
@@ -21,8 +22,11 @@ import { fitWidth } from "react-stockcharts/lib/helper";
 import { last } from "react-stockcharts/lib/utils";
 import { discontinuousTimeScaleProvider } from "react-stockcharts/lib/scale";
 
+function blackOrRed(d) {
 const RED = "#ef5350"
 const GREEN = "#48a69a"
+	return d.close > d.open ? GREEN : RED
+}
 
 class CandleStickChartForContinuousIntraDay extends React.Component {
   render() {
@@ -73,10 +77,18 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 
 		<CandlestickSeries 
 			stroke={"none"}
-			wickStroke={d => d.close > d.open ? GREEN : RED }
-			fill={d => d.close > d.open ? GREEN : RED }
+			wickStroke={blackOrRed}
+			fill={blackOrRed}
 			opacity={1}
 			widthRatio={0.8}
+		/>
+		<EdgeIndicator 
+			itemType="last"
+			orient="right"
+			edgeAt="right"
+			yAccessor={d => d.close}
+			fill={blackOrRed}
+			lineStroke={blackOrRed}
 		/>
         </Chart>
         <CrossHairCursor />

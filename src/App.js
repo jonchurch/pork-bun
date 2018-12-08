@@ -37,7 +37,7 @@ class App extends Component {
 		socket.on('m', e => {
 			const update = parseData(e)
 			
-			if (update && update.PRICE) {
+			if (this.state && update && update.PRICE) {
 				console.log(`type: ${update.T || update.TYPE} ${update.PRICE || update.P}`)
 				const data = this.state.data.slice(0)
 				console.log(update)
