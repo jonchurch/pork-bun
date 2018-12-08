@@ -31,6 +31,13 @@ const GREEN = "#48a69a"
 }
 
 class CandleStickChartForContinuousIntraDay extends React.Component {
+	constructor(props) {
+		super()
+		const { data } = props
+		const offset = 130
+		const xExtents = [data.length -1, Math.max(0, data.length - offset)]
+		this.xExtents = xExtents
+	}
   render() {
 	  const { type, data: initialData, width, height, ratio } = this.props;
 	  const xScaleProvider = discontinuousTimeScaleProvider
@@ -42,12 +49,12 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 		  displayXAccessor
 	  } = xScaleProvider(initialData)
 
-    // const xAccessor = d => d.date;
-	  const start = xAccessor(last(data));
-	  const offset = 130
-	  const n = Math.max(0, data.length - offset)
-	  const end = xAccessor(data[n]);
-	  const xExtents = [start, end];
+	  // const start = xAccessor(last(data));
+	  // const offset = 130
+	  // const n = Math.max(0, data.length - offset)
+	  // const end = xAccessor(data[n]);
+	  // const xExtents = [start, end];
+	  // console.log({xExtents})
 
 	  const margin = { left: 80, right: 80, top: 10, bottom: 30 }
 	  const gridHeight = height - margin.top - margin.bottom;
@@ -55,7 +62,6 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 	  const showGrid = true;
 	  const yGrid = showGrid ? { innerTickSize: -1 * gridWidth, tickStrokeOpacity: 0.2 } : {};
 	  const xGrid = showGrid ? { innerTickSize: -1 * gridHeight, tickStrokeOpacity: 0.2 } : {};
-
 
     return (
       <ChartCanvas height={height}
@@ -68,10 +74,13 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
           xScale={xScale}
           xAccessor={xAccessor}
 		  displayXAccessor={displayXAccessor}
-		  xExtents={xExtents}>
+		  xExtents={this.xExtents}
+		>
         <Chart id={1}
             yExtents={[d => [d.high, d.low]]}
-            padding={{ top: 40, bottom: 20 }}>
+			padding={{ top: 40, bottom: 20 }}>
+
+		  <OHLCTooltip origin={[-40, 0]} textFill="#f9f9f9"/>
           <XAxis axisAt="bottom" orient="bottom" ticks={12} tickStroke="#f9f9f9" {...xGrid} />
           <YAxis axisAt="right" orient="right" ticks={12} tickStroke="#f9f9f9" {...yGrid} />
 
@@ -79,11 +88,13 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
             rectWidth={80}
             at="bottom"
             orient="bottom"
-            displayFormat={timeFormat("%d/%m %H:%M")} />
+			displayFormat={timeFormat("%d/%m %H:%M")} 
+		/>
           <MouseCoordinateY
             at="right"
             orient="left"
-            displayFormat={format(".2f")} />
+			displayFormat={format(".2f")} 
+		/>
 
 		<CandlestickSeries 
 			stroke={"none"}
@@ -101,7 +112,7 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 			lineStroke={blackOrRed}
 		/>
         </Chart>
-        <CrossHairCursor />
+        <CrossHairCursor stroke="#000"/>
       </ChartCanvas>
     );
   }
