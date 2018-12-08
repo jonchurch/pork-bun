@@ -20,7 +20,7 @@ const BASE_URL = "https://min-api.cryptocompare.com/data/histominute"
 
 export function getData() {
 	const promiseIntraDayContinuous = 
-		fetch(`${BASE_URL}?fsym=BTC&tsym=USD&aggregate=1`)
+		fetch(`${BASE_URL}?e=Coinbase&fsym=BTC&tsym=USD&aggregate=1`)
 		.then(response => response.json())
 		.then(({Data: data}) => {
 			const parsed = data.map(datum => {
