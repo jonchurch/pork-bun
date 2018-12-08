@@ -22,6 +22,8 @@ import { fitWidth } from "react-stockcharts/lib/helper";
 import { last } from "react-stockcharts/lib/utils";
 import { discontinuousTimeScaleProvider } from "react-stockcharts/lib/scale";
 
+import withRealtimeData from '../containers/RealtimeDataWrapper'
+
 function blackOrRed(d) {
 const RED = "#ef5350"
 const GREEN = "#48a69a"
@@ -42,7 +44,7 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 
     // const xAccessor = d => d.date;
 	  const start = xAccessor(last(data));
-	  const offset = 180
+	  const offset = 130
 	  const n = Math.max(0, data.length - offset)
 	  const end = xAccessor(data[n]);
 	  const xExtents = [start, end];
@@ -117,4 +119,4 @@ CandleStickChartForContinuousIntraDay.defaultProps = {
 };
 CandleStickChartForContinuousIntraDay = fitWidth(CandleStickChartForContinuousIntraDay);
 
-export default CandleStickChartForContinuousIntraDay;
+export default withRealtimeData(CandleStickChartForContinuousIntraDay);
