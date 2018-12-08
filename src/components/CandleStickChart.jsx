@@ -12,7 +12,8 @@ import {
 import { XAxis, YAxis } from "react-stockcharts/lib/axes";
 import {
   CrossHairCursor,
-  MouseCoordinateX,
+	MouseCoordinateX,
+	EdgeIndicator,
   MouseCoordinateY,
 } from "react-stockcharts/lib/coordinates";
 
@@ -21,8 +22,11 @@ import { fitWidth } from "react-stockcharts/lib/helper";
 import { last } from "react-stockcharts/lib/utils";
 import { discontinuousTimeScaleProvider } from "react-stockcharts/lib/scale";
 
+function blackOrRed(d) {
 const RED = "#ef5350"
 const GREEN = "#48a69a"
+	return d.close > d.open ? GREEN : RED
+}
 
 class CandleStickChartForContinuousIntraDay extends React.Component {
   render() {
@@ -40,14 +44,22 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 	  const start = xAccessor(last(data));
 	  const offset = 180
 	  const n = Math.max(0, data.length - offset)
-    const end = xAccessor(data[n]);
-    const xExtents = [start, end];
+	  const end = xAccessor(data[n]);
+	  const xExtents = [start, end];
+
+	  const margin = { left: 80, right: 80, top: 10, bottom: 30 }
+	  const gridHeight = height - margin.top - margin.bottom;
+	  const gridWidth = width - margin.left - margin.right;
+	  const showGrid = true;
+	  const yGrid = showGrid ? { innerTickSize: -1 * gridWidth, tickStrokeOpacity: 0.2 } : {};
+	  const xGrid = showGrid ? { innerTickSize: -1 * gridHeight, tickStrokeOpacity: 0.2 } : {};
+
 
     return (
-      <ChartCanvas height={600}
+      <ChartCanvas height={height}
           ratio={ratio}
           width={width}
-          margin={{ left: 80, right: 80, top: 10, bottom: 30 }}
+          margin={margin}
           type={type}
 		  seriesName="BTC/USD:Coinbase"
           data={data}
@@ -58,8 +70,8 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
         <Chart id={1}
             yExtents={[d => [d.high, d.low]]}
             padding={{ top: 40, bottom: 20 }}>
-          <XAxis axisAt="bottom" orient="bottom"/>
-          <YAxis axisAt="right" orient="right" ticks={12} />
+          <XAxis axisAt="bottom" orient="bottom" tickStroke="#f9f9f9" {...xGrid} />
+          <YAxis axisAt="right" orient="right" ticks={12} tickStroke="#f9f9f9" {...yGrid} />
 
           <MouseCoordinateX
             rectWidth={80}
@@ -73,10 +85,18 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 
 		<CandlestickSeries 
 			stroke={"none"}
-			wickStroke={d => d.close > d.open ? GREEN : RED }
-			fill={d => d.close > d.open ? GREEN : RED }
+			wickStroke={blackOrRed}
+			fill={blackOrRed}
 			opacity={1}
 			widthRatio={0.8}
+		/>
+		<EdgeIndicator 
+			itemType="last"
+			orient="right"
+			edgeAt="right"
+			yAccessor={d => d.close}
+			fill={blackOrRed}
+			lineStroke={blackOrRed}
 		/>
         </Chart>
         <CrossHairCursor />
