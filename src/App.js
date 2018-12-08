@@ -1,9 +1,6 @@
 import React, { Component } from 'react';
 
 import './App.css';
-import { getData } from './utils'
-import ccHelper from './CCMapHelper'
-
 import CandleStickChart from './components/CandleStickChart'
 
 class App extends Component {
@@ -14,7 +11,7 @@ class App extends Component {
 		  exchange: "Coinbase",
 		  from: "BTC",
 		  to: "USD",
-		  resolution: 1
+		  resolution: 2 
 	  }
 	}
   render() {
@@ -22,7 +19,7 @@ class App extends Component {
     return (
       <div className="App">
 		<h1 className="title-pair">
-		{`${exchange}:${from}/${to}`}
+		{`${exchange}:${from}/${to}@${resolution}`}
 		</h1>
 		<CandleStickChart 
 			height={500}

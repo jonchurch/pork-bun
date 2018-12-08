@@ -10,7 +10,7 @@ export default function withRealtimeData(WrappedComponent) {
 		// 	super(props)
 		// }
 		componentDidMount() {
-			const {to = "USD", from ="BTC", exchange = "Coinbase", resolution = 1} = this.props//.opts
+			const {to = "USD", from = "BTC", exchange = "Coinbase", resolution = 1} = this.props//.opts
 			getData({exchange, to, from, resolution}).then(data => {
 				this.setState({ data })
 			})
@@ -61,7 +61,7 @@ export default function withRealtimeData(WrappedComponent) {
 				console.log(update)
 				const lastBar = this.getLastBar()
 				console.log(lastBar)
-				let resolution = 1//= sub.resolution
+				let resolution = this.props.resolution || 1
 				// if (resolution.includes('D')) {
 				// 	// 1 day in minutes === 1440
 				// 	resolution = 1440

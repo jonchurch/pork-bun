@@ -1,20 +1,20 @@
-import { tsvParse, csvParse } from  "d3-dsv";
-import { timeParse } from "d3-time-format";
+// import { tsvParse, csvParse } from  "d3-dsv";
+// import { timeParse } from "d3-time-format";
 
-function parseData(parse) {
-	return function(d) {
-		d.date = parse(d.date);
-		d.open = +d.open;
-		d.high = +d.high;
-		d.low = +d.low;
-		d.close = +d.close;
-		d.volume = +d.volume;
+// function parseData(parse) {
+// 	return function(d) {
+// 		d.date = parse(d.date);
+// 		d.open = +d.open;
+// 		d.high = +d.high;
+// 		d.low = +d.low;
+// 		d.close = +d.close;
+// 		d.volume = +d.volume;
 
-		return d;
-	};
-}
+// 		return d;
+// 	};
+// }
 
-const parseDateTime = timeParse("%Y-%m-%d %H:%M:%S");
+// const parseDateTime = timeParse("%Y-%m-%d %H:%M:%S");
 
 const BASE_URL = "https://min-api.cryptocompare.com/data"
 

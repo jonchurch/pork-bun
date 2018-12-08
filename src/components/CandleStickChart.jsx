@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-import { scaleTime } from "d3-scale";
+//import { scaleTime } from "d3-scale";
 import { format } from "d3-format";
 import { timeFormat } from "d3-time-format";
 
@@ -19,7 +19,7 @@ import {
 
 import { OHLCTooltip } from "react-stockcharts/lib/tooltip";
 import { fitWidth } from "react-stockcharts/lib/helper";
-import { last } from "react-stockcharts/lib/utils";
+// import { last } from "react-stockcharts/lib/utils";
 import { discontinuousTimeScaleProvider } from "react-stockcharts/lib/scale";
 
 import withRealtimeData from '../containers/RealtimeDataWrapper'
@@ -112,7 +112,7 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 			lineStroke={blackOrRed}
 		/>
         </Chart>
-        <CrossHairCursor stroke="#000"/>
+		<CrossHairCursor stroke="#ffffff"/>
       </ChartCanvas>
     );
   }
