@@ -7,14 +7,11 @@ import { timeFormat } from "d3-time-format";
 
 import { ChartCanvas, Chart } from "react-stockcharts";
 import {
-  BarSeries,
   CandlestickSeries,
 } from "react-stockcharts/lib/series";
 import { XAxis, YAxis } from "react-stockcharts/lib/axes";
 import {
   CrossHairCursor,
-  EdgeIndicator,
-  CurrentCoordinate,
   MouseCoordinateX,
   MouseCoordinateY,
 } from "react-stockcharts/lib/coordinates";
@@ -47,14 +44,14 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
     const xExtents = [start, end];
 
     return (
-      <ChartCanvas height={height}
+      <ChartCanvas height={600}
           ratio={ratio}
           width={width}
           margin={{ left: 80, right: 80, top: 10, bottom: 30 }}
           type={type}
-          seriesName="MSFT"
+		  seriesName="BTC/USD:Coinbase"
           data={data}
-          xScale={scaleTime()}
+          xScale={xScale}
           xAccessor={xAccessor}
 		  displayXAccessor={displayXAccessor}
 		  xExtents={xExtents}>
@@ -62,7 +59,7 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
             yExtents={[d => [d.high, d.low]]}
             padding={{ top: 40, bottom: 20 }}>
           <XAxis axisAt="bottom" orient="bottom"/>
-          <YAxis axisAt="left" orient="left" ticks={5} />
+          <YAxis axisAt="right" orient="right" ticks={12} />
 
           <MouseCoordinateX
             rectWidth={80}
@@ -70,7 +67,7 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
             orient="bottom"
             displayFormat={timeFormat("%d/%m %H:%M")} />
           <MouseCoordinateY
-            at="left"
+            at="right"
             orient="left"
             displayFormat={format(".2f")} />
 
