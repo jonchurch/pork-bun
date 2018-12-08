@@ -11,8 +11,8 @@ class App extends Component {
 	  super()
 	  // setup some interface for changing the pair on the chart
 	  this.state = {
-		  exchange: "CCCAGG",
-		  from: "ETH",
+		  exchange: "Coinbase",
+		  from: "BTC",
 		  to: "USD",
 		  resolution: 1
 	  }
