@@ -70,7 +70,7 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
         <Chart id={1}
             yExtents={[d => [d.high, d.low]]}
             padding={{ top: 40, bottom: 20 }}>
-          <XAxis axisAt="bottom" orient="bottom" tickStroke="#f9f9f9" {...xGrid} />
+          <XAxis axisAt="bottom" orient="bottom" ticks={12} tickStroke="#f9f9f9" {...xGrid} />
           <YAxis axisAt="right" orient="right" ticks={12} tickStroke="#f9f9f9" {...yGrid} />
 
           <MouseCoordinateX
