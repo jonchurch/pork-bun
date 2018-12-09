@@ -21,7 +21,7 @@ const BASE_URL = "https://min-api.cryptocompare.com/data"
 export function getData({exchange, to, from, resolution}) {
 	console.log(exchange, to, from, resolution)
 	const promiseIntraDayContinuous = 
-		fetch(`${BASE_URL}/${"histominute"}?e=${exchange}&fsym=${from}&tsym=${to}&aggregate=${resolution}`)
+		fetch(`${BASE_URL}/${"histominute"}?e=${exchange}&fsym=${from}&tsym=${to}`)//&aggregate=${resolution}`)
 		.then(response => response.json())
 		.then(({Data: data}) => {
 			console.log({data})
