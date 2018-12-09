@@ -38,7 +38,8 @@ class App extends Component {
 				)
 			}
 		</select>
-		<CandleStickChart 
+		<CandleStickChart
+			type="hybrid"
 			height={500}
 			// width={1200}
 			exchange={exchange}
