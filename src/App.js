@@ -11,7 +11,7 @@ class App extends Component {
 		  exchange: "Coinbase",
 		  from: "BTC",
 		  to: "USD",
-		  resolution: 15,
+		  resolution: 2,
 		  resolutionOptions: [1, 2, 5, 15, 30, 45, 60, 120, 'D']
 	  }
 	}

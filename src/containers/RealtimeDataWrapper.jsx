@@ -117,6 +117,22 @@ export default function withRealtimeData(WrappedComponent) {
 		componentWillUnmount() {
 			//cleanup our listener
 		}
+		loadMore = (start, end) => {
+			const {to = "USD", from = "BTC", exchange = "Coinbase", resolution = 1} = this.props//.opts
+			console.log('load me!', {start, end})
+			// get more data and update state 
+			const { data } = this.state
+			// need to get a timestamp in seconds for CC
+			const lastBar = data[0]
+			// I think I'll need to know the coeff of the resolution to be able to walk... or I can just use the lastbar's timestamp...
+			const lastBarTs = new Date(lastBar.date).getTime() / 1000
+			console.log({lastBarTs})
+			getData({exchange, to, from, resolution, start: lastBarTs})
+				.then(newData => {
+					console.log({newData})
+					this.setState({data: newData.concat(this.state.data)})
+				})
+		}
 		
 		render() {
 			// I want to compress the 1 min bars to 5 mins bars, ala tv
@@ -153,7 +169,7 @@ export default function withRealtimeData(WrappedComponent) {
 			console.log({reduced})
 			console.log('Bucket length:',Object.keys(grouped).length)
 
-			return <WrappedComponent data={reduced} {...this.props} />
+			return <WrappedComponent data={reduced} onLoadMore={this.loadMore} {...this.props} />
 		}
 	}
 

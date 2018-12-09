@@ -39,7 +39,7 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 		this.xExtents = xExtents
 	}
   render() {
-	  const { type, data: initialData, width, height, ratio } = this.props;
+	  const { type, data: initialData, width, height, ratio, onLoadMore } = this.props;
 	  const xScaleProvider = discontinuousTimeScaleProvider
 		  .inputDateAccessor(d => d.date)
 	  const {
@@ -75,6 +75,7 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
           xAccessor={xAccessor}
 		  displayXAccessor={displayXAccessor}
 		  xExtents={this.xExtents}
+		  onLoadMore={onLoadMore}
 		>
         <Chart id={1}
             yExtents={[d => [d.high, d.low]]}
