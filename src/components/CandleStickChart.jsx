@@ -81,7 +81,7 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 			padding={{ top: 40, bottom: 20 }}>
 
 		  <OHLCTooltip origin={[-40, 0]} textFill="#f9f9f9"/>
-          <XAxis axisAt="bottom" orient="bottom" ticks={12} tickStroke="#f9f9f9" {...xGrid} />
+          <XAxis axisAt="bottom" orient="bottom" ticks={13} tickStroke="#f9f9f9" {...xGrid} />
           <YAxis axisAt="right" orient="right" ticks={12} tickStroke="#f9f9f9" {...yGrid} />
 
           <MouseCoordinateX

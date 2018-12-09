@@ -11,7 +11,7 @@ class App extends Component {
 		  exchange: "Coinbase",
 		  from: "BTC",
 		  to: "USD",
-		  resolution: 1,
+		  resolution: 15,
 		  resolutionOptions: [1, 2, 5, 15, 30, 45, 60, 120, 'D']
 	  }
 	}
@@ -40,7 +40,7 @@ class App extends Component {
 		</select>
 		<CandleStickChart 
 			height={500}
-			width={1200}
+			// width={1200}
 			exchange={exchange}
 			from={from}
 			to={to}

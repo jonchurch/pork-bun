@@ -81,7 +81,7 @@ export default function withRealtimeData(WrappedComponent) {
 				var lastBarSec = lastBar.date.getTime() / 1000
 				console.log({lastBarSec})
 				var _lastBar
-
+				console.log(`${rounded} > ${lastBarSec}:`, rounded > lastBarSec)
 				if (rounded > lastBarSec) {
 					// create a new candle
 					_lastBar = {
@@ -122,10 +122,12 @@ export default function withRealtimeData(WrappedComponent) {
 			// I want to compress the 1 min bars to 5 mins bars, ala tv
 			// I need to reduce the array of data to timebuckets based on the set resolution
 			//
+			console.log('rendering')
 			if (this.state == null) {
 				return <div>Loading...</div>
 			}
 			const  data = this.state.data.slice(0)
+			console.log({data})
 			const { resolution } = this.props
 			const coeff = resolution * 60
 			const floorDate = coeff => candle => {
