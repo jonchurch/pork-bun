@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import io from 'socket.io-client'
+import groupBy from 'lodash.groupby'
 
 import { getData } from '../utils'
 import ccHelper from '../CCMapHelper'
@@ -8,15 +9,18 @@ export default function withRealtimeData(WrappedComponent) {
 	return class RealtimeDataContainer extends Component {
 		// constructor(props) {
 		// 	super(props)
+		// 	this.state = {
+		// 		data: []
+		// 	}
 		// }
 		componentDidMount() {
 			const {to = "USD", from = "BTC", exchange = "Coinbase", resolution = 1} = this.props//.opts
+			console.log('WRAPPER PROPS',this.props)
 			getData({exchange, to, from, resolution}).then(data => {
 				this.setState({ data })
 			})
 			const socket_url = 'wss://streamer.cryptocompare.com'
 			const socket = io(socket_url)
-			// stick these default props right on up in here r8 quick
 
 			const base = `${exchange}~${from}~${to}`
 			const currentPriceSub = `2~${base}`
@@ -62,6 +66,7 @@ export default function withRealtimeData(WrappedComponent) {
 				const lastBar = this.getLastBar()
 				console.log(lastBar)
 				let resolution = this.props.resolution || 1
+				console.log({resolution})
 				// if (resolution.includes('D')) {
 				// 	// 1 day in minutes === 1440
 				// 	resolution = 1440
@@ -78,7 +83,7 @@ export default function withRealtimeData(WrappedComponent) {
 				var _lastBar
 
 				if (rounded > lastBarSec) {
-					// create a new candle, use last close as open **PERSONAL CHOICE**
+					// create a new candle
 					_lastBar = {
 						date: new Date(rounded * 1000),
 						open: lastBar.close,
@@ -114,10 +119,26 @@ export default function withRealtimeData(WrappedComponent) {
 		}
 		
 		render() {
+			// I want to compress the 1 min bars to 5 mins bars, ala tv
+			// I need to reduce the array of data to timebuckets based on the set resolution
+			//
 			if (this.state == null) {
 				return <div>Loading...</div>
 			}
-			return <WrappedComponent data={this.state.data} {...this.props} />
+			const { data } = this.state
+			const { resolution } = this.props
+			const coeff = resolution * 60
+			const floorDate = coeff => candle => {
+					const date = candle.date.getTime() / 1000
+					return Math.floor(date / coeff) * coeff
+				}
+			const grouped = groupBy(data.slice(0), floorDate(coeff))
+			console.log('Bucket length:',Object.keys(grouped).length)
+
+			// var rounded = Math.floor(update.LASTUPDATE / coeff) * coeff
+			console.log(coeff)
+			// const filteredData = this.state.data.map()
+			return <WrappedComponent data={data} {...this.props} />
 		}
 	}
 
