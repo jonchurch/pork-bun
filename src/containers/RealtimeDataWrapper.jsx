@@ -90,7 +90,7 @@ export default function withRealtimeData(WrappedComponent) {
 						high: lastBar.close,
 						low: lastBar.close,
 						close: update.PRICE,
-						volume: update.volume
+						volume: update.LASTVOLUME
 					}
 					data.push(_lastBar)
 					this.setState({data})
@@ -103,7 +103,7 @@ export default function withRealtimeData(WrappedComponent) {
 					} else if (update.price > lastBar.high) {
 						lastBar.high = update.PRICE
 					}
-					lastBar.volume += update.volume
+					lastBar.volume += update.LASTVOLUME
 					lastBar.close = update.PRICE
 					data[data.length - 1] = lastBar
 					this.setState({data})
@@ -125,7 +125,7 @@ export default function withRealtimeData(WrappedComponent) {
 			if (this.state == null) {
 				return <div>Loading...</div>
 			}
-			const { data } = this.state
+			const  data = this.state.data.slice(0)
 			const { resolution } = this.props
 			const coeff = resolution * 60
 			const floorDate = coeff => candle => {
@@ -133,12 +133,25 @@ export default function withRealtimeData(WrappedComponent) {
 					return Math.floor(date / coeff) * coeff
 				}
 			const grouped = groupBy(data.slice(0), floorDate(coeff))
+			const reduced = Object.keys(grouped).map(key => {
+				// end product is ohlc object reduced from each array
+				const group = grouped[key]
+				const low = Math.min(...group.map(c => c.low))
+				const high = Math.max(...group.map(c => c.high))
+				const volume = group.reduce((a,b) => a + b.volume, 0)
+				return {
+					date: new Date(key * 1000),
+					open: group[0].open,
+					close: group[group.length - 1].close,
+					high,
+					low,
+					volume
+				}
+			})
+			console.log({reduced})
 			console.log('Bucket length:',Object.keys(grouped).length)
 
-			// var rounded = Math.floor(update.LASTUPDATE / coeff) * coeff
-			console.log(coeff)
-			// const filteredData = this.state.data.map()
-			return <WrappedComponent data={data} {...this.props} />
+			return <WrappedComponent data={reduced} {...this.props} />
 		}
 	}
 

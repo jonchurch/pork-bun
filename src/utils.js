@@ -26,13 +26,14 @@ export function getData({exchange, to, from, resolution}) {
 		.then(({Data: data}) => {
 			console.log({data})
 			const parsed = data.map(datum => {
+				// console.log({datum})
 				return {
 					date: new Date(datum.time * 1000),
 					high: datum.high,
 					low: datum.low,
 					open: datum.open,
 					close: datum.close,
-					volume: datum.to
+					volume: datum.volumefrom
 				}
 			})
 			return parsed
