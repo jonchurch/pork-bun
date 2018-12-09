@@ -11,16 +11,33 @@ class App extends Component {
 		  exchange: "Coinbase",
 		  from: "BTC",
 		  to: "USD",
-		  resolution: 2 
+		  resolution: 1,
+		  resolutionOptions: [1, 2, 5, 15, 30, 45, 60, 120, 'D']
 	  }
 	}
+
+	onSelectChange = e => {
+		this.setState({resolution: e.target.value})
+	}
   render() {
-	  const {exchange, from, to, resolution} = this.state
+	  const {exchange, from, to, resolution, resolutionOptions} = this.state
+	  const infoString = `${exchange}:${from}/${to}@${resolution}`
     return (
       <div className="App">
 		<h1 className="title-pair">
-		{`${exchange}:${from}/${to}@${resolution}`}
+		{ infoString }
 		</h1>
+		<select
+			name="resolution"
+			value={resolution}
+			onChange={this.onSelectChange}
+		>
+			{
+			resolutionOptions.map(
+				e => <option key={e} value={e} >{e}</option>
+				)
+			}
+		</select>
 		<CandleStickChart 
 			height={500}
 			width={1200}
