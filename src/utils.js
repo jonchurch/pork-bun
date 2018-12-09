@@ -20,6 +20,9 @@ const BASE_URL = "https://min-api.cryptocompare.com/data"
 
 function parseCCData({Data: data}) {
 	console.log({data})
+	if (!data.length) {
+		return []
+	}
 	const parsed = data.map(datum => {
 		// console.log({datum})
 		return {
@@ -36,17 +39,24 @@ function parseCCData({Data: data}) {
 
 export function getData({exchange, to, from, resolution, start}) {
 	console.log(exchange, to, from, resolution, start)
-	const promiseIntraDayContinuous = 
-		fetch(`${BASE_URL}/${"histominute"}?e=${exchange}&fsym=${from}&tsym=${to}${start ? "&toTs=" + start : '&limit=200'}`)//&aggregate=${resolution}`)
+		return fetch(`${BASE_URL}/${"histominute"}?e=${exchange}&fsym=${from}&tsym=${to}${start ? "&toTs=" + start : '&limit=200'}`)//&aggregate=${resolution}`)
 		.then(response => response.json())
+		.then(res => {
+			console.log({res})
+			if (! res.Data.length) {
+				console.error(new Error(res.Message))
+				// return 
+			}
+			return res
+		})
 		.then(parseCCData)
 		.then(data => {
 			data.sort((a, b) => {
 				return a.date.valueOf() - b.date.valueOf();
 			});
 			return data;
-		});
-	return promiseIntraDayContinuous;
+		})
+		.catch(err => {throw err})
 }
 
 
