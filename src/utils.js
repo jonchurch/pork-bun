@@ -39,7 +39,7 @@ function parseCCData({Data: data}) {
 
 export function getData({exchange, to, from, resolution, start}) {
 	console.log(exchange, to, from, resolution, start)
-		return fetch(`${BASE_URL}/${"histominute"}?e=${exchange}&fsym=${from}&tsym=${to}${start ? "&toTs=" + start : '&limit=200'}`)//&aggregate=${resolution}`)
+		return fetch(`${BASE_URL}/${resolution >= 60 ? "histohour" : "histominute"}?e=${exchange}&fsym=${from}&tsym=${to}${start ? "&toTs=" + start : ''}`)//&aggregate=${resolution}`)
 		.then(response => response.json())
 		.then(res => {
 			console.log({res})
@@ -56,7 +56,7 @@ export function getData({exchange, to, from, resolution, start}) {
 			});
 			return data;
 		})
-		.catch(err => {throw err})
+		// .catch(err => {throw err})
 }
 
 
