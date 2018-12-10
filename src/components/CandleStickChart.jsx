@@ -7,7 +7,9 @@ import { timeFormat } from "d3-time-format";
 
 import { ChartCanvas, Chart } from "react-stockcharts";
 import {
-  CandlestickSeries,
+	CandlestickSeries,
+	VolumeProfileSeries,
+	BarSeries,
 } from "react-stockcharts/lib/series";
 import { XAxis, YAxis } from "react-stockcharts/lib/axes";
 import {
@@ -23,10 +25,10 @@ import { fitWidth } from "react-stockcharts/lib/helper";
 import { discontinuousTimeScaleProvider } from "react-stockcharts/lib/scale";
 
 import withRealtimeData from '../containers/RealtimeDataWrapper'
-
-function blackOrRed(d) {
+const OFFWHITE = "#f9f9f9"
 const RED = "#ef5350"
 const GREEN = "#48a69a"
+function blackOrRed(d) {
 	return d.close > d.open ? GREEN : RED
 }
 
@@ -39,7 +41,7 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 		this.xExtents = xExtents
 	}
   render() {
-	  const { type, data: initialData, width, height, ratio } = this.props;
+	  const { type, data: initialData, width, height, ratio, onLoadMore } = this.props;
 	  const xScaleProvider = discontinuousTimeScaleProvider
 		  .inputDateAccessor(d => d.date)
 	  const {
@@ -75,14 +77,38 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
           xAccessor={xAccessor}
 		  displayXAccessor={displayXAccessor}
 		  xExtents={this.xExtents}
-		>
+		  onLoadMore={onLoadMore}
+	  >
+		  <Chart id={2}
+			  yExtents={[d => d.volume]}
+			  height={100}
+			  origin={(w,h) => [0, h - 100]}
+		  >
+			  {/*
+			  <YAxis 
+				  axisAt="left"
+				  orient="left"
+				  ticks={5}
+				  ticksFormat={format(".2s")}
+				  tickStroke={OFFWHITE}
+			  />
+
+					  */}
+			  <BarSeries
+					  yAccessor={d => d.volume}
+					  widthRatio={0.95}
+					  opacity={0.4}
+					  fill={blackOrRed}
+					  stroke={false}
+				  />
+		  </Chart>
         <Chart id={1}
             yExtents={[d => [d.high, d.low]]}
 			padding={{ top: 40, bottom: 20 }}>
 
-		  <OHLCTooltip origin={[-40, 0]} textFill="#f9f9f9"/>
-          <XAxis axisAt="bottom" orient="bottom" ticks={12} tickStroke="#f9f9f9" {...xGrid} />
-          <YAxis axisAt="right" orient="right" ticks={12} tickStroke="#f9f9f9" {...yGrid} />
+		  <OHLCTooltip origin={[-40, 0]} textFill={OFFWHITE}/>
+          <XAxis axisAt="bottom" orient="bottom" ticks={13} tickStroke={OFFWHITE} {...xGrid} />
+          <YAxis axisAt="right" orient="right" ticks={12} tickStroke={OFFWHITE} {...yGrid} />
 
           <MouseCoordinateX
             rectWidth={80}
@@ -96,6 +122,7 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 			displayFormat={format(".2f")} 
 		/>
 
+	
 		<CandlestickSeries 
 			stroke={"none"}
 			wickStroke={blackOrRed}
