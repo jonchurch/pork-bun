@@ -97,13 +97,15 @@ export function useCandleReducer(infoString, initialState = {}) {
 	const [infoStringBase, resolution] = infoString.split("@")
 	const baseResolution = reduceResolution(resolution)
 	const newInfoString = `${infoStringBase}@${baseResolution}`
+	console.log({baseResolution})
 	const candleState = state[newInfoString] //|| initialCandleState
-
-	const {loading, candleData, canLoadMore, allTs} = state[infoString] || initialCandleState
+	console.log({candleState})
+	// const {loading, candleData, canLoadMore, allTs} = state[infoString] || initialCandleState
+	const {loading, candleData, canLoadMore, allTs} = candleState || initialCandleState
 	return [{loading, candleData, canLoadMore, allTs}, dispatch]
 }
 
-	function reduceResolution(rez) {
+	export function reduceResolution(rez) {
 		rez = typeof Number(rez) === 'number' ? Number(rez) : rez
 		console.log('REZ IN REDUCEREZ:', rez)
 		if (typeof rez === 'string' && rez.includes('D')) return "D"
