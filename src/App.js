@@ -11,7 +11,7 @@ class App extends Component {
 		  exchange: "Coinbase",
 		  from: "BTC",
 		  to: "USD",
-		  resolution: 2,
+		  resolution: 120,
 		  resolutionOptions: [1, 2, 5, 15, 30, 45, 60, 120, 'D']
 	  }
 	}
@@ -24,10 +24,12 @@ class App extends Component {
 	  const infoString = `${exchange}:${from}/${to}@${resolution}`
     return (
       <div className="App">
-		<h1 className="title-pair">
-		{ infoString }
-		</h1>
+		<span>
+			<h2 className="title-pair">
+			{ infoString }
+			</h2>
 		<select
+			className="resolution-selector"
 			name="resolution"
 			value={resolution}
 			onChange={this.onSelectChange}
@@ -38,9 +40,10 @@ class App extends Component {
 				)
 			}
 		</select>
+		</span>
 		<CandleStickChart
 			type="hybrid"
-			height={500}
+			height={675}
 			// width={1200}
 			exchange={exchange}
 			from={from}
