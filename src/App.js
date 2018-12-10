@@ -6,6 +6,8 @@ import CandleStickChart from './components/CandleStickChart'
 import { getData } from './utils'
 import { useCandleReducer, useCandleSelector, reduceResolution } from './hooks'
 
+const resolutionOptions = [1, 2, 5, 15, 30, 45, 60, 120, 'D']
+
 function App() {
 	const [exchange, setExchange] = useState("Coinbase")
 	const [from, setFrom] = useState("BTC")
@@ -20,39 +22,23 @@ function App() {
 
 	console.log({baseInfoString})
 
-	// const initialCandleState = {loading: false, canLoadMore: true, candleData: {}}
-
-	console.log({allTs})
-	const chartData = useCandleSelector(allTs, candleData, resolution)//useMemo(() => selectCandleData(allTs, candleData, resolution), [allTs, candleData, resolution])
-	// const chartData = allTs.map(index => candleData[index])
-	
-	console.log({candleData})
-	const resolutionOptions = [1, 2, 5, 15, 30, 45, 60, 120, 'D']
+	const chartData = useCandleSelector(allTs, candleData, resolution)
 
 	const onSelectChange = e => setResolution(e.target.value)
 	const onLoadMore = async (start, end) => {
-		console.log('=====running loadMore')
 		if (loading || !canLoadMore) {
 			return 
 		}
-		dispatch({type: 'REQUEST_CANDLES', id: baseInfoString}) // tell state we are loading...
-		// do async action 
-		console.log('IN LOAD MORE', {allTs})
-		const lastBarTs = allTs[0]//Math.min(...allTs)
-		console.log({lastBarTs})
+		dispatch({type: 'REQUEST_CANDLES', id: baseInfoString})
+		const lastBarTs = allTs[0]
 		const payload = await getData({exchange, to, from, resolution, start: lastBarTs})
-		console.log({payload})
 		dispatch({type: "RECEIVE_CANDLES", id: baseInfoString, payload})
 
 	}
-	// this is an async action creator, basically
-	const loadChartData = () => {
-		console.log('======running load chart')
-		dispatch({type: 'REQUEST_CANDLES', id: baseInfoString}) // tell state we are loading...
-		// do async action 
-		// const lastBarTs = Math.min(allTs)//candleData.byId[candleData.allids[0]].date.getTime() / 1000
-		const payload = getData({exchange, to, from, resolution})
-			.then(payload => dispatch({type: "RECEIVE_CANDLES", id: baseInfoString, payload}))
+	const loadChartData = async () => {
+		dispatch({type: 'REQUEST_CANDLES', id: baseInfoString})
+		const payload = await getData({exchange, to, from, resolution})
+		dispatch({type: "RECEIVE_CANDLES", id: baseInfoString, payload})
 		
 	}
 	if (loading === false && allTs.length < 1) {

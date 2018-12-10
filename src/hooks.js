@@ -6,9 +6,9 @@ export const useCandleSelector = (allTs, candleData, resolution) => {
 
 	function selectCandleData(allTs, candleData, resolution) {
 		let reduced = null
+		// resolution = String.includes(resolution, "D") ? resolution === "2D" ? 172800 : 86400 : resolution
 		const data = allTs.map(index => candleData[index])
 		if (!(resolution === 1 || resolution === 60)) {
-			// const allTs = state[infoString].allTs
 			const coeff = resolution * 60
 			const floorDate = coeff => candle => {
 					// console.log({candle})
@@ -31,14 +31,13 @@ export const useCandleSelector = (allTs, candleData, resolution) => {
 					volume
 				}
 			})
-		console.log({reduced})
-		console.log('Bucket length:',Object.keys(grouped).length)
+		// console.log({reduced})
+		// console.log('Bucket length:',Object.keys(grouped).length)
 		}
 		return reduced || data
 	}
 }
 export function useCandleReducer(infoString, initialState = {}) {
-	// const [state, setState] = useState({ [infoString]: initialState})
 	const initialCandleState = {loading: false, canLoadMore: true, candleData: {}, allTs: []}
 	initialState = {
 		...initialState,
@@ -92,16 +91,15 @@ export function useCandleReducer(infoString, initialState = {}) {
 		}
 	}
 	const [state, dispatch] = useReducer(rootReducer, initialState)
-	// useCandleSelector(allTs, candleData, resolution)//useMemo(() => selectCandleData(allTs, candleData, resolution), [allTs, candleData, resolution])
 	// select base resolution state
 	const [infoStringBase, resolution] = infoString.split("@")
 	const baseResolution = reduceResolution(resolution)
 	const newInfoString = `${infoStringBase}@${baseResolution}`
 	console.log({baseResolution})
-	const candleState = state[newInfoString] //|| initialCandleState
-	console.log({candleState})
+	// const candleState = state[newInfoString] //|| initialCandleState
+	// console.log({candleState})
 	// const {loading, candleData, canLoadMore, allTs} = state[infoString] || initialCandleState
-	const {loading, candleData, canLoadMore, allTs} = candleState || initialCandleState
+	const {loading, candleData, canLoadMore, allTs} = state[newInfoString] || initialCandleState
 	return [{loading, candleData, canLoadMore, allTs}, dispatch]
 }
 
