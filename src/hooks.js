@@ -8,11 +8,11 @@ export function useCandleReducer(infoString, initialState = {}) {
 			[infoString]: initialCandleState
 		}
 		// console.log({initialState})
-		const candleReducer = function(state, action) {
+		const candleReducer = function(state = initialCandleState, action) {
 					// debugger
 			const { payload } = action
 			const { candleData } = state
-			console.log({state})
+			console.log('IN CANDLE REDUCER:',{state})
 			switch (action.type) {
 				case "REQUEST_CANDLES":
 					return {
@@ -54,14 +54,23 @@ export function useCandleReducer(infoString, initialState = {}) {
 						...state,
 						[action.id]: candleReducer(state[action.id], action)
 					}
+				// case 'SELECT_RESOLUTION':
+				// 	return {
+				// 		...state,
+				// 		[action.id]: candleReducer(state[action.id], action)
+				// 	}
 				default:
 					return state
 			}
 		}
 		const [state, dispatch] = useReducer(rootReducer, initialState)
-		// dispatch({type: "REQUEST_CANDLES", id: infoString})
-		const {loading, candleData, canLoadMore, allTs} = state[infoString]
+
+		console.log('IN ROOT CUSTOM HOOK:', {state})
+		console.log({infoString})
 		console.log('STATE.INFOSTRING',state[infoString])
+		//giving it default state if state doesnt exist yet
+		const {loading, candleData, canLoadMore, allTs} = state[infoString] || initialCandleState
+
 		console.log('inside custom hook', {candleData})
 		return [{loading, candleData, canLoadMore, allTs}, dispatch]
 	}
