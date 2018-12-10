@@ -1,10 +1,10 @@
-import React, { Component, useState, useReducer } from 'react';
+import React, { Component, useState, useReducer, useMemo } from 'react';
 
 import './App.css';
 import CandleStickChart from './components/CandleStickChart'
 
 import { getData } from './utils'
-import { useCandleReducer } from './hooks'
+import { useCandleReducer, useCandleSelector } from './hooks'
 
 function App() {
 	const [exchange, setExchange] = useState("Coinbase")
@@ -17,6 +17,10 @@ function App() {
 	// const initialCandleState = {loading: false, canLoadMore: true, candleData: {}}
 
 	const [{loading, candleData, canLoadMore, allTs}, dispatch] = useCandleReducer(infoString)
+	console.log({allTs})
+	const chartData = useCandleSelector(allTs, candleData, resolution)//useMemo(() => selectCandleData(allTs, candleData, resolution), [allTs, candleData, resolution])
+	// const chartData = allTs.map(index => candleData[index])
+	
 	console.log({candleData})
 	const resolutionOptions = [1, 2, 5, 15, 30, 45, 60, 120, 'D']
 
@@ -36,7 +40,7 @@ function App() {
 		dispatch({type: "RECEIVE_CANDLES", id: infoString, payload})
 
 	}
-
+	// this is an async action creator, basically
 	const loadChartData = () => {
 		console.log('======running load chart')
 		dispatch({type: 'REQUEST_CANDLES', id: infoString}) // tell state we are loading...
@@ -52,6 +56,8 @@ function App() {
 	}
 	console.log({candleData})
 	console.log({allTs})
+
+	// const chartData = selectChartData(resolution)
     return (
       <div className="App">
 		<span>
@@ -78,7 +84,7 @@ function App() {
 			from={from}
 			to={to}
 			resolution={resolution}
-			data={allTs.map(index => candleData[index])} // should candles be transformed inside or outside chart? prolly reducer side? Selector?
+			data={chartData} // should candles be transformed inside or outside chart? prolly reducer side? Selector?
 			onLoadMore={onLoadMore}
 		/>
       </div>

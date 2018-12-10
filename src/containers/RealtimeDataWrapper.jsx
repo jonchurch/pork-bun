@@ -179,7 +179,7 @@ export default function withRealtimeData(WrappedComponent) {
 			console.log('rendering')
 			if (this.props.data.length < 1) {
 				console.log(this.props.data)
-				return <div>Loading...</div>
+				return <div style={{color: "#f9f9f9"}}>Loading...</div>
 			}
 			// console.log('======= data state',this.state.data)
 
@@ -217,7 +217,8 @@ export default function withRealtimeData(WrappedComponent) {
 
 			// return <WrappedComponent data={reduced} onLoadMore={this.loadMore} {...this.props} />
 			console.log('DATA PROPS IN WRAPPER',this.props.data)
-			return <WrappedComponent onLoadMore={this.loadMore} {...this.props} data={reduced || this.props.data}  />
+			// return <WrappedComponent onLoadMore={this.loadMore} {...this.props} data={reduced || this.props.data}  />
+			return <WrappedComponent {...this.props} data={reduced || this.props.data}  />
 		}
 	}
 
