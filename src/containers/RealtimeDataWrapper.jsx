@@ -186,35 +186,38 @@ export default function withRealtimeData(WrappedComponent) {
 
 // 			const  data = this.props.data.slice(0)
 // 			console.log({data})
-// 			const { resolution } = this.props
-// 			const coeff = resolution * 60
-// 			const floorDate = coeff => candle => {
-// 					console.log({candle})
-// 					const date = candle.date.getTime() / 1000
-// 					return Math.floor(date / coeff) * coeff
-// 				}
-// 			const grouped = groupBy(data.slice(0), floorDate(coeff))
-// 			const reduced = Object.keys(grouped).map(key => {
-// 				// end product is ohlc object reduced from each array
-// 				const group = grouped[key]
-// 				const low = Math.min(...group.map(c => c.low))
-// 				const high = Math.max(...group.map(c => c.high))
-// 				const volume = group.reduce((a,b) => a + b.volume, 0)
-// 				return {
-// 					date: new Date(key * 1000),
-// 					open: group[0].open,
-// 					close: group[group.length - 1].close,
-// 					high,
-// 					low,
-// 					volume
-// 				}
-// 			})
-// 			console.log({reduced})
-// 			console.log('Bucket length:',Object.keys(grouped).length)
+			const { resolution, data } = this.props
+			let reduced = null
+			if (!(resolution === 1 || resolution === 60)) {
+				const coeff = resolution * 60
+				const floorDate = coeff => candle => {
+						// console.log({candle})
+						const date = candle.date.getTime() / 1000
+						return Math.floor(date / coeff) * coeff
+					}
+				const grouped = groupBy(data.slice(0), floorDate(coeff))
+				reduced = Object.keys(grouped).map(key => {
+					// end product is ohlc object reduced from each array
+					const group = grouped[key]
+					const low = Math.min(...group.map(c => c.low))
+					const high = Math.max(...group.map(c => c.high))
+					const volume = group.reduce((a,b) => a + b.volume, 0)
+					return {
+						date: new Date(key * 1000),
+						open: group[0].open,
+						close: group[group.length - 1].close,
+						high,
+						low,
+						volume
+					}
+				})
+			console.log({reduced})
+			console.log('Bucket length:',Object.keys(grouped).length)
+			}
 
 			// return <WrappedComponent data={reduced} onLoadMore={this.loadMore} {...this.props} />
 			console.log('DATA PROPS IN WRAPPER',this.props.data)
-			return <WrappedComponent data={this.props.data} onLoadMore={this.loadMore} {...this.props} />
+			return <WrappedComponent onLoadMore={this.loadMore} {...this.props} data={reduced || this.props.data}  />
 		}
 	}
 
