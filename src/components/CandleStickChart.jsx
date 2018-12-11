@@ -31,16 +31,16 @@ const GREEN = "#48a69a"
 function blackOrRed(d) {
 	return d.close > d.open ? GREEN : RED
 }
-
+const eightFixed = format(".8f")
+const twoFixed = format(".2f")
 class CandleStickChartForContinuousIntraDay extends React.Component {
 	constructor(props) {
 		super()
 		const { data } = props
 		const offset = 130
 		const xExtents = [data.length -1, Math.max(0, data.length - offset)]
-		console.log('DATA prop LENGTH IN CANDLE CHART constructor:', data.length)
-		console.log({xExtents})
 		this.xExtents = xExtents
+		this.priceFormat = props.data[0].close > 1 ? twoFixed : eightFixed
 	}
   render() {
 	  const { type, data: initialData, width, height, ratio, onLoadMore } = this.props;
@@ -59,6 +59,7 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 	  // const end = xAccessor(data[n]);
 	  // const xExtents = [start, end];
 	  // console.log({xExtents})
+
 
 	  const margin = { left: 80, right: 80, top: 10, bottom: 30 }
 	  const gridHeight = height - margin.top - margin.bottom;
@@ -110,7 +111,7 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 
 		  <OHLCTooltip origin={[-40, 0]} textFill={OFFWHITE}/>
           <XAxis axisAt="bottom" orient="bottom" ticks={13} tickStroke={OFFWHITE} {...xGrid} />
-          <YAxis axisAt="right" orient="right" ticks={12} tickStroke={OFFWHITE} {...yGrid} />
+          <YAxis axisAt="right" tickFormat={this.priceFormat} orient="right" ticks={12} tickStroke={OFFWHITE} {...yGrid} />
 
           <MouseCoordinateX
             rectWidth={80}
@@ -121,7 +122,7 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
           <MouseCoordinateY
             at="right"
             orient="left"
-			displayFormat={format(".2f")} 
+			displayFormat={this.priceFormat} 
 		/>
 
 	
@@ -139,6 +140,7 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 			yAccessor={d => d.close}
 			fill={blackOrRed}
 			lineStroke={blackOrRed}
+			displayFormat={this.priceFormat}
 		/>
         </Chart>
 		<CrossHairCursor stroke="#ffffff"/>
