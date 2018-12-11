@@ -38,6 +38,8 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 		const { data } = props
 		const offset = 130
 		const xExtents = [data.length -1, Math.max(0, data.length - offset)]
+		console.log('DATA prop LENGTH IN CANDLE CHART constructor:', data.length)
+		console.log({xExtents})
 		this.xExtents = xExtents
 	}
   render() {

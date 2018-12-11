@@ -6,17 +6,19 @@ import CandleStickChart from './components/CandleStickChart'
 import { getData } from './utils'
 import { useCandleReducer, useCandleSelector, reduceResolution } from './hooks'
 
-const resolutionOptions = [1, 2, 5, 15, 30, 45, 60, 120, 'D']
+const resolutionOptions = [1, 2, 5, 15, 30, 45, 60, 120, 'D', '2D']
 
 function App() {
 	const [exchange, setExchange] = useState("Coinbase")
 	const [from, setFrom] = useState("BTC")
 	const [to, setTo] = useState("USD")
-	const [resolution, setResolution] = useState("120")
-
+	const [resolution, setResolution] = useState("D")
+	console.log('resolution top of app:',resolution)
 	const infoString = `${exchange}:${from}/${to}@${resolution}`
+	console.log({infoString})
 	const [infoBase]= infoString.split("@")
 	const baseResolution = reduceResolution(resolution)
+	console.log('top of app',{baseResolution})
 	const baseInfoString = `${infoBase}@${baseResolution}`
 	const [{loading, candleData, canLoadMore, allTs}, dispatch] = useCandleReducer(baseInfoString)
 
