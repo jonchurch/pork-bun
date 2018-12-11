@@ -19,9 +19,11 @@ export default function withRealtimeData(WrappedComponent) {
 		}
 		componentDidMount() {
 			const {to = "USD", from = "BTC", exchange = "Coinbase", resolution = 1} = this.props//.opts
-			getData({exchange, to, from, resolution}).then(data => {
-				this.setState({ data })
-			})//.catch(err => console.error(err))
+			// dispatch getCandleData
+			// getData({exchange, to, from, resolution}).then(data => {
+			// 	this.setState({ data })
+			// })//.catch(err => console.error(err))
+			// dispatch subRealtime
 			const socket_url = 'wss://streamer.cryptocompare.com'
 			const socket = io(socket_url)
 
@@ -119,18 +121,16 @@ export default function withRealtimeData(WrappedComponent) {
 		componentWillUnmount() {
 			//cleanup our listener
 		}
+		// callback for loading more data into the chart, mutates state
 		loadMore = (start, end) => {
 			if (this.state.loading || !this.state.canLoadMore) {
 				return
 			}
 			this.setState({loading: true})
 			const {to = "USD", from = "BTC", exchange = "Coinbase", resolution = 1} = this.props//.opts
-			console.log('load me!', {start, end})
-			// get more data and update state 
 			const { data } = this.state
 			// need to get a timestamp in seconds for CC
 			const lastBar = data[0]
-			// I think I'll need to know the coeff of the resolution to be able to walk... or I can just use the lastbar's timestamp...
 			const lastBarTs = lastBar.date.getTime() / 1000
 			console.log({lastBarTs})
 			return getData({exchange, to, from, resolution, start: lastBarTs})
@@ -177,38 +177,48 @@ export default function withRealtimeData(WrappedComponent) {
 			// I need to reduce the array of data to timebuckets based on the set resolution
 			//
 			console.log('rendering')
-			if (this.state.data.length < 1) {
-				return <div>Loading...</div>
+			if (this.props.data.length < 1) {
+				console.log(this.props.data)
+				return <div style={{color: "#f9f9f9"}}>Loading...</div>
 			}
 			// console.log('======= data state',this.state.data)
-			const  data = this.state.data.slice(0)
-			console.log({data})
-			const { resolution } = this.props
-			const coeff = resolution * 60
-			const floorDate = coeff => candle => {
-					const date = candle.date.getTime() / 1000
-					return Math.floor(date / coeff) * coeff
-				}
-			const grouped = groupBy(data.slice(0), floorDate(coeff))
-			const reduced = Object.keys(grouped).map(key => {
-				// end product is ohlc object reduced from each array
-				const group = grouped[key]
-				const low = Math.min(...group.map(c => c.low))
-				const high = Math.max(...group.map(c => c.high))
-				const volume = group.reduce((a,b) => a + b.volume, 0)
-				return {
-					date: new Date(key * 1000),
-					open: group[0].open,
-					close: group[group.length - 1].close,
-					high,
-					low,
-					volume
-				}
-			})
-			console.log({reduced})
-			console.log('Bucket length:',Object.keys(grouped).length)
 
-			return <WrappedComponent data={reduced} onLoadMore={this.loadMore} {...this.props} />
+
+// 			const  data = this.props.data.slice(0)
+// 			console.log({data})
+			// const { resolution, data } = this.props
+			// let reduced = null
+			// if (!(resolution === 1 || resolution === 60)) {
+			// 	const coeff = resolution * 60
+			// 	const floorDate = coeff => candle => {
+			// 			// console.log({candle})
+			// 			const date = candle.date.getTime() / 1000
+			// 			return Math.floor(date / coeff) * coeff
+			// 		}
+			// 	const grouped = groupBy(data.slice(0), floorDate(coeff))
+			// 	reduced = Object.keys(grouped).map(key => {
+			// 		// end product is ohlc object reduced from each array
+			// 		const group = grouped[key]
+			// 		const low = Math.min(...group.map(c => c.low))
+			// 		const high = Math.max(...group.map(c => c.high))
+			// 		const volume = group.reduce((a,b) => a + b.volume, 0)
+			// 		return {
+			// 			date: new Date(key * 1000),
+			// 			open: group[0].open,
+			// 			close: group[group.length - 1].close,
+			// 			high,
+			// 			low,
+			// 			volume
+			// 		}
+			// 	})
+			// console.log({reduced})
+			// console.log('Bucket length:',Object.keys(grouped).length)
+			// }
+
+			// return <WrappedComponent data={reduced} onLoadMore={this.loadMore} {...this.props} />
+			console.log('DATA PROPS IN WRAPPER',this.props.data)
+			// return <WrappedComponent onLoadMore={this.loadMore} {...this.props} data={reduced || this.props.data}  />
+			return <WrappedComponent {...this.props}   />
 		}
 	}
 

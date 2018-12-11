@@ -38,8 +38,14 @@ function parseCCData({Data: data}) {
 }
 
 export function getData({exchange, to, from, resolution, start}) {
-	console.log(exchange, to, from, resolution, start)
-		return fetch(`${BASE_URL}/${resolution >= 60 ? "histohour" : "histominute"}?e=${exchange}&fsym=${from}&tsym=${to}&limit=2000${start ? "&toTs=" + start : ''}`)//&aggregate=${resolution}`)
+	// console.log(exchange, to, from, resolution, start)
+	if (resolution.includes("D")) {
+		// resolution = resolution === "2D" ? 172800 : 86400
+		resolution = "histoday"
+	} else {
+		resolution = resolution >= 60 ? "histohour" : "histominute"
+	}
+		return fetch(`${BASE_URL}/${resolution}?e=${exchange}&fsym=${from}&tsym=${to}&limit=${resolution === "histoday" ? 500 : 2000}${start ? "&toTs=" + start : ''}`)//&aggregate=${resolution}`)
 		.then(response => response.json())
 		.then(res => {
 			console.log({res})
@@ -51,6 +57,7 @@ export function getData({exchange, to, from, resolution, start}) {
 		})
 		.then(parseCCData)
 		.then(data => {
+			console.log('got data from api:', {data})
 			data.sort((a, b) => {
 				return a.date.valueOf() - b.date.valueOf();
 			});
