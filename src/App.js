@@ -6,7 +6,7 @@ import CandleStickChart from './components/CandleStickChart'
 import { getData } from './utils'
 import { useCandleReducer, useCandleSelector, reduceResolution } from './hooks'
 
-const resolutionOptions = [1, 2, 5, 15, 30, 45, 60, 120, 'D', '2D']
+const resolutionOptions = [1, 5, 15, 30, 45, 60, 120, 240, 'D', '2D']
 
 function App() {
 	const [exchange, setExchange] = useState("Coinbase")
