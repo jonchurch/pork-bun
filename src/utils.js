@@ -18,32 +18,52 @@
 
 const BASE_URL = "https://min-api.cryptocompare.com/data"
 
-export function getData({exchange, to, from, resolution}) {
-	console.log(exchange, to, from, resolution)
-	const promiseIntraDayContinuous = 
-		fetch(`${BASE_URL}/${"histominute"}?e=${exchange}&fsym=${from}&tsym=${to}`)//&aggregate=${resolution}`)
+function parseCCData({Data: data}) {
+	console.log({data})
+	if (!data.length) {
+		return []
+	}
+	const parsed = data.map(datum => {
+		// console.log({datum})
+		return {
+			date: new Date(datum.time * 1000),
+			high: datum.high,
+			low: datum.low,
+			open: datum.open,
+			close: datum.close,
+			volume: datum.volumefrom
+		}
+	})
+	return parsed
+}
+
+export function getData({exchange, to, from, resolution, start}) {
+	// console.log(exchange, to, from, resolution, start)
+	if (resolution.includes("D")) {
+		// resolution = resolution === "2D" ? 172800 : 86400
+		resolution = "histoday"
+	} else {
+		resolution = resolution >= 60 ? "histohour" : "histominute"
+	}
+		return fetch(`${BASE_URL}/${resolution}?e=${exchange}&fsym=${from}&tsym=${to}&limit=${resolution === "histoday" ? 500 : 2000}${start ? "&toTs=" + start : ''}`)//&aggregate=${resolution}`)
 		.then(response => response.json())
-		.then(({Data: data}) => {
-			console.log({data})
-			const parsed = data.map(datum => {
-				// console.log({datum})
-				return {
-					date: new Date(datum.time * 1000),
-					high: datum.high,
-					low: datum.low,
-					open: datum.open,
-					close: datum.close,
-					volume: datum.volumefrom
-				}
-			})
-			return parsed
+		.then(res => {
+			console.log({res})
+			if (! res.Data.length) {
+				console.error(new Error(res.Message))
+				// return 
+			}
+			return res
 		})
+		.then(parseCCData)
 		.then(data => {
+			console.log('got data from api:', {data})
 			data.sort((a, b) => {
 				return a.date.valueOf() - b.date.valueOf();
 			});
 			return data;
-		});
-	return promiseIntraDayContinuous;
+		})
+		// .catch(err => {throw err})
 }
+
 
