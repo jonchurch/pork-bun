@@ -11,6 +11,7 @@ import {
 	VolumeProfileSeries,
 	BarSeries,
 } from "react-stockcharts/lib/series";
+import { TrendLine } from 'react-stockcharts/lib/interactive'
 import { XAxis, YAxis } from "react-stockcharts/lib/axes";
 import {
   CrossHairCursor,
@@ -67,6 +68,19 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 	  const showGrid = true;
 	  const yGrid = showGrid ? { innerTickSize: -1 * gridWidth, tickStrokeOpacity: 0.2 } : {};
 	  const xGrid = showGrid ? { innerTickSize: -1 * gridHeight, tickStrokeOpacity: 0.2 } : {};
+
+	  const mockTrends = [{
+		  start: [data.length - 70, 7387],
+		  end: [data.length - 5, 7387],
+		  appearance: {stroke: "red", strokeWidth: 2},
+		  type: "LINE"
+	  },
+		  {
+	  start: [data.length - 70, 3700],
+	  end: [data.length - 5, 3700],
+	  appearance: {stroke: "red", strokeWidth: 2},
+	  type: "XLINE"
+  }]
 
     return (
       <ChartCanvas height={height}
@@ -132,6 +146,10 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 			fill={blackOrRed}
 			opacity={1}
 			widthRatio={0.8}
+		/>
+		<TrendLine 
+			type="LINE"
+			trends={mockTrends}
 		/>
 		<EdgeIndicator 
 			itemType="last"
