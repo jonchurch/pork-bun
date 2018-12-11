@@ -38,8 +38,8 @@ export function useRealtimeData({exchange, to, from}, dispatch) {
 		const currentPriceSub = `2~${base}`
 		const tradeSub = `0~${base}`
 		const subs = [
-			// currentPriceSub,
-			tradeSub
+			currentPriceSub,
+			// tradeSub
 		]
 
 		socket.emit('SubAdd', {subs})
