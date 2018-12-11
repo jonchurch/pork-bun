@@ -11,7 +11,7 @@ import {
 	VolumeProfileSeries,
 	BarSeries,
 } from "react-stockcharts/lib/series";
-import { TrendLine } from 'react-stockcharts/lib/interactive'
+import { TrendLine, ClickCallback } from 'react-stockcharts/lib/interactive'
 import { XAxis, YAxis } from "react-stockcharts/lib/axes";
 import {
   CrossHairCursor,
@@ -68,19 +68,49 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 	  const showGrid = true;
 	  const yGrid = showGrid ? { innerTickSize: -1 * gridWidth, tickStrokeOpacity: 0.2 } : {};
 	  const xGrid = showGrid ? { innerTickSize: -1 * gridHeight, tickStrokeOpacity: 0.2 } : {};
-
-	  const mockTrends = [{
-		  start: [data.length - 70, 7387],
-		  end: [data.length - 5, 7387],
-		  appearance: {stroke: "red", strokeWidth: 2},
-		  type: "LINE"
+	  // I need to actually use the xAccessor and get index values for the trendlines
+	  // or, I need the index of the particular bar in the data, maybe xAccessor isnt necessary
+	  // regardless, I need dates to be able to pin the lines to
+	  const mockTrends = [
+	  // {
+		  // start: [data.length - 70, 7387],
+		  // end: [data.length - 5, 7387],
+		  // appearance: {stroke: "red", strokeWidth: 2},
+		  // type: "LINE"
+	  // },
+		  // I can keep trends in dates/utc, and round down like how I recompose candles
+		  // the actual values for the trendlines will change though as the underlying data changes
+		  {
+			start: [1538524800, 7000],
+			end: [1543449600, 7000],
+			appearance: {stroke: "red", strokeWidth: 2},
+			type: "LINE"
+	  
 	  },
 		  {
-	  start: [data.length - 70, 3700],
-	  end: [data.length - 5, 3700],
-	  appearance: {stroke: "red", strokeWidth: 2},
-	  type: "XLINE"
-  }]
+			start: [1543935600, 4035.10],
+			end: [1544457600, 3523.25],
+			appearance: {stroke: "red", strokeWidth: 2},
+			type: "LINE"
+	  
+	  },
+	  ]
+
+	  const translateTrends = trend => {
+		  const { type, appearance } = trend
+		  // const [start] = data.filter(d => (d.date.getTime() / 1000) === trend.start[0])
+		  const start = data.filter(d => (d.date.getTime() / 1000) <=  trend.start[0]).pop()
+		  const end = data.filter(d => (d.date.getTime() / 1000) <=  trend.end[0]).pop()
+		  console.log({start, end})
+		  const translated =  {
+			  start: [xAccessor(start), trend.start[1]],
+			  end: [xAccessor(end), trend.end[1]],
+			  appearance,
+			  type,
+		  }
+		  console.log('start end translated:',{translated})
+		  return translated
+	  }
 
     return (
       <ChartCanvas height={height}
@@ -149,7 +179,10 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 		/>
 		<TrendLine 
 			type="LINE"
-			trends={mockTrends}
+			trends={mockTrends.map(translateTrends)}
+		/>
+		<ClickCallback 
+			onMouseDown={handleDebugClick}
 		/>
 		<EdgeIndicator 
 			itemType="last"
@@ -165,6 +198,12 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
       </ChartCanvas>
     );
   }
+}
+
+function handleDebugClick(props, event) {
+	const { currentItem } = props
+	console.log('Click@:', currentItem.date.getTime() / 1000)
+
 }
 
 CandleStickChartForContinuousIntraDay.propTypes = {
