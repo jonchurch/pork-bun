@@ -38,25 +38,34 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 	constructor(props) {
 		super()
 		const { data } = props
-		const offset = 130
-		const xExtents = [data.length -1, Math.max(0, data.length - offset)]
+		const range = 180
+		const rightOffset = 10
+		// const xExtents = [data.length -1, Math.max(0, data.length - range)]
+		const xExtents = [data.length + rightOffset, Math.max(0, data.length - range)]
 		this.xExtents = xExtents
 		this.priceFormat = props.data[0].close > 1 ? twoFixed : eightFixed
 		const trends_1 = [
 			{
-			  start: [1538524800, 7000],
-			  end: [1543449600, 7000],
+			  start: [300, 7000],
+			  end: [500, 7000],
 			  appearance: {stroke: "red", strokeWidth: 2},
 			  type: "LINE"
 		
 		},
-			{
-			  start: [1543935600, 4035.10],
-			  end: [1544457600, 3523.25],
-			  appearance: {stroke: "red", strokeWidth: 2},
-			  type: "LINE"
+			// {
+			//   start: [1538524800, 7000],
+			//   end: [1543449600, 7000],
+			//   appearance: {stroke: "red", strokeWidth: 2},
+			//   type: "LINE"
 		
-		},
+		// },
+			// {
+			//   start: [1543935600, 4035.10],
+			//   end: [1544457600, 3523.25],
+			//   appearance: {stroke: "red", strokeWidth: 2},
+			//   type: "LINE"
+		
+		// },
 		]
 		this.state = {
 			enableTrendLine: false,
@@ -102,26 +111,27 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 	onDrawCompleteChart1 = trends_1 => {
 		// console.log({trends_1});
 		// we get an array of trends with their new values
-		const newTrends = trends_1.map((trend, i) => {
-			// turn these indexes to dates
-			const startCandle = this.props.data[trend.start[0]]
-			const endCandle = this.props.data[trend.end[0]]
-			const startDate = startCandle.date.getTime() / 1000
-			const endDate = endCandle.date.getTime() / 1000
-			// console.log({startCandle, endCandle})
-			// console.log({startDate, endDate})
-			const newTrend = {
-				...trend,
-				start: [startDate, trend.start[1]],
-				end: [endDate, trend.end[1]],
-			}
-			// console.log('startdate',{newTrend})
-			return newTrend
+		// const newTrends = trends_1.map((trend, i) => {
+		// 	// turn these indexes to dates
+		// 	const startCandle = this.props.data[trend.start[0]]
+		// 	const endCandle = this.props.data[trend.end[0]]
+		// 	const startDate = startCandle.date.getTime() / 1000
+		// 	const endDate = endCandle.date.getTime() / 1000
+		// 	// console.log({startCandle, endCandle})
+		// 	// console.log({startDate, endDate})
+		// 	const newTrend = {
+		// 		...trend,
+		// 		start: [startDate, trend.start[1]],
+		// 		end: [endDate, trend.end[1]],
+		// 	}
+		// 	// console.log('startdate',{newTrend})
+		// 	return newTrend
 			 
-		})
+		// })
 		this.setState({
 			enableTrendLine: false,
-			trends_1: newTrends
+			trends_1,
+			// trends_1: newTrends
 		});
   }
   render() {
@@ -243,7 +253,8 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 			// snapTo={d => [d.high, d.low]}
 			// onStart={() => console.log('Trendline start drag')}
 			onComplete={this.onDrawCompleteChart1}
-			trends={this.state.trends_1.map(translateTrends)}
+			trends={this.state.trends_1}
+			// trends={this.state.trends_1.map(translateTrends)}
 		/>
 
 	{/*
