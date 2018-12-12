@@ -11,6 +11,7 @@ import {
 	VolumeProfileSeries,
 	BarSeries,
 } from "react-stockcharts/lib/series";
+import { TrendLine, ClickCallback, DrawingObjectSelector } from 'react-stockcharts/lib/interactive'
 import { XAxis, YAxis } from "react-stockcharts/lib/axes";
 import {
   CrossHairCursor,
@@ -41,7 +42,88 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 		const xExtents = [data.length -1, Math.max(0, data.length - offset)]
 		this.xExtents = xExtents
 		this.priceFormat = props.data[0].close > 1 ? twoFixed : eightFixed
+		const trends_1 = [
+			{
+			  start: [1538524800, 7000],
+			  end: [1543449600, 7000],
+			  appearance: {stroke: "red", strokeWidth: 2},
+			  type: "LINE"
+		
+		},
+			{
+			  start: [1543935600, 4035.10],
+			  end: [1544457600, 3523.25],
+			  appearance: {stroke: "red", strokeWidth: 2},
+			  type: "LINE"
+		
+		},
+		]
+		this.state = {
+			enableTrendLine: false,
+			trends_1,
+			trends_3: [],
+		}
 	}
+
+	getInteractiveNodes = () => {
+		// console.log('GETTING INTERACTIVE NODES:', this.interactiveNodes)
+		return this.interactiveNodes
+	}
+	saveCanvasNode = node => this.canvasNode = node
+	saveInteractiveNodes = (type, chartId) => {
+		// console.log("Saving node for chart:", chartId)
+		return node => {
+			// console.log({node})
+			if (!this.interactiveNodes) {
+				this.interactiveNodes = {}
+			}
+			const key = `${type}_${chartId}`
+			if (node || this.interactiveNodes[key]) {
+				this.interactiveNodes = {
+					...this.interactiveNodes,
+					[key]: { type, chartId, node }
+				}
+			}
+		}
+	}
+	saveInteractiveNode = chartId => 
+		node => {
+			this[`node_${chartId}`] = node
+			// console.log('SAVE INTERACTIVENODE',{node})
+		}
+	handleSelection = (type, chartId) => selectionArray => {
+		// console.log("HANDLE SELECTION")
+		const key = `${type}_${chartId}`
+		const interactive = this.state[key].map((each, idx) => ({...each, selected: selectionArray[idx]}))
+		this.setState({
+			[key]: interactive
+		})
+	}
+	onDrawCompleteChart1 = trends_1 => {
+		// console.log({trends_1});
+		// we get an array of trends with their new values
+		const newTrends = trends_1.map((trend, i) => {
+			// turn these indexes to dates
+			const startCandle = this.props.data[trend.start[0]]
+			const endCandle = this.props.data[trend.end[0]]
+			const startDate = startCandle.date.getTime() / 1000
+			const endDate = endCandle.date.getTime() / 1000
+			// console.log({startCandle, endCandle})
+			// console.log({startDate, endDate})
+			const newTrend = {
+				...trend,
+				start: [startDate, trend.start[1]],
+				end: [endDate, trend.end[1]],
+			}
+			// console.log('startdate',{newTrend})
+			return newTrend
+			 
+		})
+		this.setState({
+			enableTrendLine: false,
+			trends_1: newTrends
+		});
+  }
   render() {
 	  const { type, data: initialData, width, height, ratio, onLoadMore } = this.props;
 	  const xScaleProvider = discontinuousTimeScaleProvider
@@ -52,7 +134,7 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 		  xAccessor,
 		  displayXAccessor
 	  } = xScaleProvider(initialData)
-
+	  // console.log('whole state in render:', this.state)
 	  // const start = xAccessor(last(data));
 	  // const offset = 130
 	  // const n = Math.max(0, data.length - offset)
@@ -67,9 +149,29 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 	  const showGrid = true;
 	  const yGrid = showGrid ? { innerTickSize: -1 * gridWidth, tickStrokeOpacity: 0.2 } : {};
 	  const xGrid = showGrid ? { innerTickSize: -1 * gridHeight, tickStrokeOpacity: 0.2 } : {};
+	  // I need to actually use the xAccessor and get index values for the trendlines
+	  // or, I need the index of the particular bar in the data, maybe xAccessor isnt necessary
+	  // regardless, I need dates to be able to pin the lines to
+
+	  const translateTrends = trend => {
+		  const { type, appearance } = trend
+		  // const [start] = data.filter(d => (d.date.getTime() / 1000) === trend.start[0])
+		  const start = data.filter(d => (d.date.getTime() / 1000) <=  trend.start[0]).pop()
+		  const end = data.filter(d => (d.date.getTime() / 1000) <=  trend.end[0]).pop()
+		  // console.log('TRANSLATE',{start, end})
+		  const translated =  {
+			  start: [start === null ? start : xAccessor(start), trend.start[1]],
+			  end: [end === null ? end : xAccessor(end), trend.end[1]],
+			  appearance,
+			  type,
+		  }
+		  // console.log('start end translated:',{translated})
+		  return translated
+	  }
 
     return (
-      <ChartCanvas height={height}
+		<ChartCanvas height={height}
+			ref={this.saveCanvasNode}
           ratio={ratio}
           width={width}
           margin={margin}
@@ -133,6 +235,22 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 			opacity={1}
 			widthRatio={0.8}
 		/>
+		<TrendLine 
+			ref={this.saveInteractiveNodes("Trendline", 1)}
+			enabled={this.state.enableTrendLine}
+			type="LINE"
+			snap={false}
+			// snapTo={d => [d.high, d.low]}
+			// onStart={() => console.log('Trendline start drag')}
+			onComplete={this.onDrawCompleteChart1}
+			trends={this.state.trends_1.map(translateTrends)}
+		/>
+
+	{/*
+		<ClickCallback 
+			onMouseDown={handleDebugClick}
+		/>
+				*/}
 		<EdgeIndicator 
 			itemType="last"
 			orient="right"
@@ -143,10 +261,24 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 			displayFormat={this.priceFormat}
 		/>
         </Chart>
+		<DrawingObjectSelector
+			enabled={!this.state.enableTrendLine}
+			getInteractiveNodes={this.getInteractiveNodes}
+			drawingObjectMap={{
+			Trendline: "trends"
+			}}
+			onSelect={this.handleSelection}
+		/>
 		<CrossHairCursor stroke="#ffffff"/>
       </ChartCanvas>
     );
   }
+}
+
+function handleDebugClick(props, event) {
+	const { currentItem } = props
+	console.log('Click@:', currentItem.date.getTime() / 1000)
+
 }
 
 CandleStickChartForContinuousIntraDay.propTypes = {

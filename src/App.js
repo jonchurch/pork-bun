@@ -4,7 +4,7 @@ import './App.css';
 import CandleStickChart from './components/CandleStickChart'
 
 import { getData } from './utils'
-import { useCandleReducer, useCandleSelector, reduceResolution } from './hooks'
+import { useCandleReducer, useCandleSelector, reduceResolution, useRealtimeData} from './hooks'
 
 const resolutionOptions = [1, 5, 15, 30, 45, 60, 120, 240, 'D', '2D']
 
@@ -21,6 +21,8 @@ function App() {
 	console.log('top of app',{baseResolution})
 	const baseInfoString = `${infoBase}@${baseResolution}`
 	const [{loading, candleData, canLoadMore, allTs}, dispatch] = useCandleReducer(baseInfoString)
+
+	useRealtimeData({exchange, to, from}, dispatch)
 
 	console.log({baseInfoString})
 
