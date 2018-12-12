@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-//import { scaleTime } from "d3-scale";
+import { scaleTime } from "d3-scale";
 import { format } from "d3-format";
 import { timeFormat } from "d3-time-format";
 
@@ -22,7 +22,7 @@ import {
 
 import { OHLCTooltip } from "react-stockcharts/lib/tooltip";
 import { fitWidth } from "react-stockcharts/lib/helper";
-// import { last } from "react-stockcharts/lib/utils";
+import { last } from "react-stockcharts/lib/utils";
 import { discontinuousTimeScaleProvider } from "react-stockcharts/lib/scale";
 
 import withRealtimeData from '../containers/RealtimeDataWrapper'
@@ -32,6 +32,7 @@ const GREEN = "#48a69a"
 function blackOrRed(d) {
 	return d.close > d.open ? GREEN : RED
 }
+const xAccessor = d => d.date
 const eightFixed = format(".8f")
 const twoFixed = format(".2f")
 class CandleStickChartForContinuousIntraDay extends React.Component {
@@ -39,24 +40,25 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 		super()
 		const { data } = props
 		const offset = 130
-		const xExtents = [data.length -1, Math.max(0, data.length - offset)]
+		const xExtents = [xAccessor(data[data.length -1]), xAccessor(data[Math.max(0, data.length - offset)])]
+		// const xExtents = [xAccessor(data[data.length -1]), {date: new Date(1544752647000)}]
 		this.xExtents = xExtents
 		this.priceFormat = props.data[0].close > 1 ? twoFixed : eightFixed
 		const trends_1 = [
 			{
 			  start: [1538524800, 7000],
-			  end: [1543449600, 7000],
+			  end: [1544572800, 4500],
 			  appearance: {stroke: "red", strokeWidth: 2},
 			  type: "LINE"
 		
 		},
-			{
-			  start: [1543935600, 4035.10],
-			  end: [1544457600, 3523.25],
-			  appearance: {stroke: "red", strokeWidth: 2},
-			  type: "LINE"
+			// {
+			//   start: [1543935600, 4035.10],
+			//   end: [1544457600, 3523.25],
+			//   appearance: {stroke: "red", strokeWidth: 2},
+			//   type: "LINE"
 		
-		},
+		// },
 		]
 		this.state = {
 			enableTrendLine: false,
@@ -100,14 +102,14 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 		})
 	}
 	onDrawCompleteChart1 = trends_1 => {
-		// console.log({trends_1});
+		console.log({trends_1});
 		// we get an array of trends with their new values
 		const newTrends = trends_1.map((trend, i) => {
-			// turn these indexes to dates
-			const startCandle = this.props.data[trend.start[0]]
-			const endCandle = this.props.data[trend.end[0]]
-			const startDate = startCandle.date.getTime() / 1000
-			const endDate = endCandle.date.getTime() / 1000
+			// turn these date objects into seconds
+			// const startCandle = this.props.data[trend.start[0]]
+			// const endCandle = this.props.data[trend.end[0]]
+			const startDate = trend.start[0].getTime() / 1000
+			const endDate = trend.end[0].getTime() / 1000
 			// console.log({startCandle, endCandle})
 			// console.log({startDate, endDate})
 			const newTrend = {
@@ -117,7 +119,7 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 			}
 			// console.log('startdate',{newTrend})
 			return newTrend
-			 
+			return trend
 		})
 		this.setState({
 			enableTrendLine: false,
@@ -125,15 +127,31 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 		});
   }
   render() {
-	  const { type, data: initialData, width, height, ratio, onLoadMore } = this.props;
-	  const xScaleProvider = discontinuousTimeScaleProvider
-		  .inputDateAccessor(d => d.date)
-	  const {
-		  data,
-		  xScale,
-		  xAccessor,
-		  displayXAccessor
-	  } = xScaleProvider(initialData)
+	  const { type, data, width, height, ratio, onLoadMore } = this.props;
+	  const interval  = data[1].date.getTime() - data[0].date.getTime()
+	  console.log({interval})
+	  const newest = last(data)
+	  const blanks = getNewDates(newest.date, interval)
+	  console.log({blanks})
+
+	  function getNewDates(from, interval) {
+		  const n = 100
+		  const newDates = []
+		  for (let i = 1; i < n + 1; i++) {
+			  const date = new Date(from + (interval * i))
+			  newDates.push({date, open: 0, high: 0, low: 0, close: 0})
+		  }
+		  return newDates
+	  }
+	  const xScale = scaleTime()
+	  // const xScaleProvider = discontinuousTimeScaleProvider
+		  // .inputDateAccessor(d => d.date)
+	  // const {
+		  // data,
+		  // xScale,
+		  // xAccessor,
+		  // displayXAccessor
+	  // } = xScaleProvider(initialData)
 	  // console.log('whole state in render:', this.state)
 	  // const start = xAccessor(last(data));
 	  // const offset = 130
@@ -156,18 +174,21 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 	  const translateTrends = trend => {
 		  const { type, appearance } = trend
 		  // const [start] = data.filter(d => (d.date.getTime() / 1000) === trend.start[0])
+		  // const start = data.filter(d => (d.date.getTime() / 1000) <=  trend.start[0]).pop()
+		  // const end = data.filter(d => (d.date.getTime() / 1000) <=  trend.end[0]).pop()
 		  const start = data.filter(d => (d.date.getTime() / 1000) <=  trend.start[0]).pop()
 		  const end = data.filter(d => (d.date.getTime() / 1000) <=  trend.end[0]).pop()
-		  // console.log('TRANSLATE',{start, end})
 		  const translated =  {
 			  start: [start === null ? start : xAccessor(start), trend.start[1]],
 			  end: [end === null ? end : xAccessor(end), trend.end[1]],
 			  appearance,
 			  type,
 		  }
-		  // console.log('start end translated:',{translated})
+		  console.log('start end translated:',{translated})
 		  return translated
 	  }
+	  const dataJoin = data.concat(blanks)
+	  console.log({dataJoin})
 
     return (
 		<ChartCanvas height={height}
@@ -177,10 +198,10 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
           margin={margin}
           type={type}
 		  seriesName="BTC/USD:Coinbase"
-          data={data}
+          data={dataJoin}
           xScale={xScale}
           xAccessor={xAccessor}
-		  displayXAccessor={displayXAccessor}
+		  // displayXAccessor={displayXAccessor}
 		  xExtents={this.xExtents}
 		  onLoadMore={onLoadMore}
 	  >
@@ -243,14 +264,13 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 			// snapTo={d => [d.high, d.low]}
 			// onStart={() => console.log('Trendline start drag')}
 			onComplete={this.onDrawCompleteChart1}
+			// trends={this.state.trends_1}
 			trends={this.state.trends_1.map(translateTrends)}
 		/>
 
-	{/*
 		<ClickCallback 
 			onMouseDown={handleDebugClick}
 		/>
-				*/}
 		<EdgeIndicator 
 			itemType="last"
 			orient="right"
@@ -260,7 +280,8 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 			lineStroke={blackOrRed}
 			displayFormat={this.priceFormat}
 		/>
-        </Chart>
+	</Chart>
+	{/*
 		<DrawingObjectSelector
 			enabled={!this.state.enableTrendLine}
 			getInteractiveNodes={this.getInteractiveNodes}
@@ -269,6 +290,7 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 			}}
 			onSelect={this.handleSelection}
 		/>
+	*/}
 		<CrossHairCursor stroke="#ffffff"/>
       </ChartCanvas>
     );

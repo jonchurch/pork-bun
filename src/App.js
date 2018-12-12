@@ -1,4 +1,5 @@
 import React, { Component, useState, useReducer, useMemo } from 'react';
+import { last } from "react-stockcharts/lib/utils";
 
 import './App.css';
 import CandleStickChart from './components/CandleStickChart'
@@ -49,6 +50,25 @@ function App() {
 		console.log({candleData})
 		loadChartData()
 	}
+	if (chartData.length < 1) {
+		return <p>Loading</p>
+	}
+	  const interval  = chartData[1].date.getTime() - chartData[0].date.getTime()
+	  console.log({interval})
+	  const newest = last(chartData)
+	  const blanks = getNewDates(newest.date, interval)
+	  console.log({blanks})
+
+	  function getNewDates(from, interval) {
+		  const n = 100
+		  const newDates = []
+		  for (let i = 1; i < n + 1; i++) {
+			  const date = new Date(from + (interval * i))
+			  newDates.push({date, open: 0, high: 0, low: 0, close: 0})
+		  }
+		  return newDates
+	  }
+	const dataJoin = chartData.concat(blanks)
 	console.log({candleData})
 	console.log({allTs})
 
@@ -79,7 +99,7 @@ function App() {
 			from={from}
 			to={to}
 			resolution={resolution}
-			data={chartData} // should candles be transformed inside or outside chart? prolly reducer side? Selector?
+			data={dataJoin} // should candles be transformed inside or outside chart? prolly reducer side? Selector?
 			onLoadMore={onLoadMore}
 		/>
       </div>
