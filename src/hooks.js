@@ -52,11 +52,12 @@ export function useRealtimeData({exchange, to, from}, dispatch) {
 			const update = parseCCSocketData(event)
 			// console.log({update})
 			if (update === null) return
-			// const { price } = update
-			if (update) {
-				const diff = (now - lastTrade) / 1000
+			const { price, volume } = update
+			console.log({price, volume})
+			if (price || volume) {
+				// const diff = (now - lastTrade) / 1000
 				lastTrade = now
-				console.log('trade update', update)
+				// console.log('trade update', update)
 				// console.log(`Trade:${p} Last:${diff}`)
 				dispatch({type: 'SOCKET_PRICE_UPDATE', payload: update, exchange, from, to})
 			}
@@ -117,13 +118,17 @@ export function useCandleReducer(infoString, initialState = {}) {
 				if (state.allTs && state.allTs.length > 0) {
 					const lastTs = state.allTs.slice(0).pop()
 					let  lastBar = {...candleData[lastTs]}
-					if (price < lastBar.low) {
-						lastBar.low = price
-					} else if (price > lastBar.high) {
-						lastBar.high = price
+					if (price) {
+						if (price < lastBar.low) {
+							lastBar.low = price
+						} else if (price > lastBar.high) {
+							lastBar.high = price
+						}
+						lastBar.close = price
 					}
-					lastBar.volume += volume
-					lastBar.close = price
+					if (volume) {
+						lastBar.volume += volume
+					}
 					console.log('New close:',lastBar.close)
 					const newState = {
 						...state,
