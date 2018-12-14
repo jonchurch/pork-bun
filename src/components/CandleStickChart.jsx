@@ -282,7 +282,7 @@ function floorDate(date, coeff) {
 		  </Chart>
         <Chart id={1}
             yExtents={[d => [d.high, d.low]]}
-			padding={{ top: 40, bottom: 20 }}>
+			padding={{ top: 20, bottom: 40 }}>
 
 		  <OHLCTooltip origin={[-40, 0]} textFill={OFFWHITE}/>
           <XAxis axisAt="bottom" orient="bottom" ticks={13} tickStroke={OFFWHITE} {...xGrid} />
