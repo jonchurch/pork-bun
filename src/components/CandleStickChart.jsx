@@ -55,7 +55,7 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 		
 		// },
 			{
-			  start: [1538524800, 7000],
+			  start: [1545116041, 7000],
 			  end: [1543449600, 7000],
 			  appearance: {stroke: "red", strokeWidth: 2},
 			  type: "LINE"
@@ -118,7 +118,7 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 			// turn these indexes to dates
 			const startCandle = this.props.data[trend.start[0]]
 			const endCandle = this.props.data[trend.end[0]]
-			const resolution = resolution === "D" ? 86400 : 3600
+			const resolution = this.props.resolution === "D" ? 86400 : 3600
 
 			console.log({resolution})
 			// we need to convert an index into a future date we can store a ts for the trend xy
@@ -127,12 +127,19 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 			const msToAdd = (intervalsIntoFuture * resolution) * 1000
 			const newFutureDate = new Date(lastBar.date.getTime() + msToAdd).getTime() / 1000
 			console.log({newFutureDate})
+			// we are outputting timestamps to state
+			// and handling it special if the timestamp lay outside the range of our data
 			const startDate = startCandle ?
 				startCandle.date.getTime() / 1000 
 				: 
 				newFutureDate
 				
-			const endDate = endCandle.date.getTime() / 1000
+			const _intervalsIntoFuture = trend.end[0] - this.props.data.length
+			const _msToAdd = (_intervalsIntoFuture * resolution) * 1000
+			const _newFutureDate = new Date(lastBar.date.getTime() + _msToAdd).getTime() / 1000
+			const endDate = endCandle ? 
+				endCandle.date.getTime() / 1000
+				: _newFutureDate
 			console.log({startCandle, endCandle})
 			// console.log({startDate, endDate})
 			const newTrend = {
@@ -179,19 +186,59 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 	  // or, I need the index of the particular bar in the data, maybe xAccessor isnt necessary
 	  // regardless, I need dates to be able to pin the lines to
 
+const storedTs = 1538524850 // non future
+const futureTs = 1545116041
+const resolutionSec = 86400 // day
+
+// get closest date that's in range
+const newDate = floorDate(futureTs, resolutionSec)
+console.log(newDate)
+
+function floorDate(date, coeff) {
+	const ts = typeof date === 'object' ? date.getTime() / 1000 : date
+	return Math.floor(date/coeff) * coeff
+} 
+
 	  const translateTrends = trend => {
 		  const { type, appearance } = trend
+		  let startIndex
+		  let endIndex
+		  const resolutionSec = this.props.resolution === "D" ? 86400 : 3600
 		  // const [start] = data.filter(d => (d.date.getTime() / 1000) === trend.start[0])
-		  const start = data.filter(d => (d.date.getTime() / 1000) <=  trend.start[0]).pop()
-		  const end = data.filter(d => (d.date.getTime() / 1000) <=  trend.end[0]).pop()
+		  const lastBarTs = data[data.length - 1].date.getTime() / 1000
+		  const flooredStart = floorDate(trend.start[0], resolutionSec)
+		  if (flooredStart > lastBarTs) {
+			  // we are in the future
+			  // count out how many intervals into the future we are
+			  const diff = Math.floor((flooredStart - lastBarTs) / resolutionSec)
+			  console.log({diff})
+			  startIndex = data.length + diff - 1
+		  } else {
+			  startIndex = data.findIndex(e => Math.floor(e.date.getTime() / 1000) === flooredStart)
+		  }
+		  const flooredEnd = floorDate(trend.end[0], resolutionSec)
+		  console.log({flooredEnd, flooredStart})
+		  if (flooredEnd > lastBarTs) {
+			  // we are in the future
+			  // count out how many intervals into the future we are
+			  const diff = Math.floor((flooredEnd - lastBarTs) / resolutionSec)
+			  // console.log({diff})
+			  endIndex = data.length + diff - 1
+		  } else {
+			  endIndex = data.findIndex(e => Math.floor(e.date.getTime() / 1000) === flooredEnd)
+		  }
+		  // const start = data.filter(d => (d.date.getTime() / 1000) <=  trend.start[0]).pop()
+		  // const end = data.filter(d => (d.date.getTime() / 1000) <=  trend.end[0]).pop()
 		  // console.log('TRANSLATE',{start, end})
+		  // my goal here is to output position indexes, I'm supplied ts
 		  const translated =  {
-			  start: [start === null ? start : xAccessor(start), trend.start[1]],
-			  end: [end === null ? end : xAccessor(end), trend.end[1]],
+			  start: [startIndex, trend.start[1]],
+			  end: [endIndex, trend.end[1]],
 			  appearance,
 			  type,
 		  }
-		  // console.log('start end translated:',{translated})
+			  console.log({startIndex})
+		  console.log('start end translated:',{translated})
 		  return translated
 	  }
 
