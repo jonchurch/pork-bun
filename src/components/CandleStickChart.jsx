@@ -26,6 +26,8 @@ import { fitWidth } from "react-stockcharts/lib/helper";
 import { discontinuousTimeScaleProvider } from "react-stockcharts/lib/scale";
 
 import withRealtimeData from '../containers/RealtimeDataWrapper'
+import { reduceResolution } from '../hooks'
+
 const OFFWHITE = "#f9f9f9"
 const RED = "#ef5350"
 const GREEN = "#48a69a"
@@ -38,25 +40,34 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 	constructor(props) {
 		super()
 		const { data } = props
-		const offset = 130
-		const xExtents = [data.length -1, Math.max(0, data.length - offset)]
+		const range = 180
+		const rightOffset = 10
+		// const xExtents = [data.length -1, Math.max(0, data.length - range)]
+		const xExtents = [data.length + rightOffset, Math.max(0, data.length - range)]
 		this.xExtents = xExtents
 		this.priceFormat = props.data[0].close > 1 ? twoFixed : eightFixed
 		const trends_1 = [
+			// {
+			//   start: [300, 7000],
+			//   end: [500, 7000],
+			//   appearance: {stroke: "red", strokeWidth: 2},
+			//   type: "LINE"
+		
+		// },
 			{
-			  start: [1538524800, 7000],
+			  start: [1545116041, 7000],
 			  end: [1543449600, 7000],
 			  appearance: {stroke: "red", strokeWidth: 2},
 			  type: "LINE"
 		
 		},
-			{
-			  start: [1543935600, 4035.10],
-			  end: [1544457600, 3523.25],
-			  appearance: {stroke: "red", strokeWidth: 2},
-			  type: "LINE"
+			// {
+			//   start: [1543935600, 4035.10],
+			//   end: [1544457600, 3523.25],
+			//   appearance: {stroke: "red", strokeWidth: 2},
+			//   type: "LINE"
 		
-		},
+		// },
 		]
 		this.state = {
 			enableTrendLine: false,
@@ -100,27 +111,49 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 		})
 	}
 	onDrawCompleteChart1 = trends_1 => {
-		// console.log({trends_1});
+		console.log({trends_1});
 		// we get an array of trends with their new values
+		// if its passing indexes, we need to turn them into dates
 		const newTrends = trends_1.map((trend, i) => {
 			// turn these indexes to dates
 			const startCandle = this.props.data[trend.start[0]]
 			const endCandle = this.props.data[trend.end[0]]
-			const startDate = startCandle.date.getTime() / 1000
-			const endDate = endCandle.date.getTime() / 1000
-			// console.log({startCandle, endCandle})
+			const resolution = this.props.resolution === "D" ? 86400 : 3600
+
+			console.log({resolution})
+			// we need to convert an index into a future date we can store a ts for the trend xy
+			const lastBar = this.props.data[this.props.data.length - 1]
+			const intervalsIntoFuture = trend.start[0] - this.props.data.length
+			const msToAdd = (intervalsIntoFuture * resolution) * 1000
+			const newFutureDate = new Date(lastBar.date.getTime() + msToAdd).getTime() / 1000
+			console.log({newFutureDate})
+			// we are outputting timestamps to state
+			// and handling it special if the timestamp lay outside the range of our data
+			const startDate = startCandle ?
+				startCandle.date.getTime() / 1000 
+				: 
+				newFutureDate
+				
+			const _intervalsIntoFuture = trend.end[0] - this.props.data.length
+			const _msToAdd = (_intervalsIntoFuture * resolution) * 1000
+			const _newFutureDate = new Date(lastBar.date.getTime() + _msToAdd).getTime() / 1000
+			const endDate = endCandle ? 
+				endCandle.date.getTime() / 1000
+				: _newFutureDate
+			console.log({startCandle, endCandle})
 			// console.log({startDate, endDate})
 			const newTrend = {
 				...trend,
 				start: [startDate, trend.start[1]],
 				end: [endDate, trend.end[1]],
 			}
-			// console.log('startdate',{newTrend})
+			console.log('newTrends',{newTrend})
 			return newTrend
 			 
 		})
 		this.setState({
 			enableTrendLine: false,
+			// trends_1,
 			trends_1: newTrends
 		});
   }
@@ -153,19 +186,59 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 	  // or, I need the index of the particular bar in the data, maybe xAccessor isnt necessary
 	  // regardless, I need dates to be able to pin the lines to
 
+const storedTs = 1538524850 // non future
+const futureTs = 1545116041
+const resolutionSec = 86400 // day
+
+// get closest date that's in range
+const newDate = floorDate(futureTs, resolutionSec)
+console.log(newDate)
+
+function floorDate(date, coeff) {
+	const ts = typeof date === 'object' ? date.getTime() / 1000 : date
+	return Math.floor(date/coeff) * coeff
+} 
+
 	  const translateTrends = trend => {
 		  const { type, appearance } = trend
+		  let startIndex
+		  let endIndex
+		  const resolutionSec = this.props.resolution === "D" ? 86400 : 3600
 		  // const [start] = data.filter(d => (d.date.getTime() / 1000) === trend.start[0])
-		  const start = data.filter(d => (d.date.getTime() / 1000) <=  trend.start[0]).pop()
-		  const end = data.filter(d => (d.date.getTime() / 1000) <=  trend.end[0]).pop()
+		  const lastBarTs = data[data.length - 1].date.getTime() / 1000
+		  const flooredStart = floorDate(trend.start[0], resolutionSec)
+		  if (flooredStart > lastBarTs) {
+			  // we are in the future
+			  // count out how many intervals into the future we are
+			  const diff = Math.floor((flooredStart - lastBarTs) / resolutionSec)
+			  console.log({diff})
+			  startIndex = data.length + diff - 1
+		  } else {
+			  startIndex = data.findIndex(e => Math.floor(e.date.getTime() / 1000) === flooredStart)
+		  }
+		  const flooredEnd = floorDate(trend.end[0], resolutionSec)
+		  console.log({flooredEnd, flooredStart})
+		  if (flooredEnd > lastBarTs) {
+			  // we are in the future
+			  // count out how many intervals into the future we are
+			  const diff = Math.floor((flooredEnd - lastBarTs) / resolutionSec)
+			  // console.log({diff})
+			  endIndex = data.length + diff - 1
+		  } else {
+			  endIndex = data.findIndex(e => Math.floor(e.date.getTime() / 1000) === flooredEnd)
+		  }
+		  // const start = data.filter(d => (d.date.getTime() / 1000) <=  trend.start[0]).pop()
+		  // const end = data.filter(d => (d.date.getTime() / 1000) <=  trend.end[0]).pop()
 		  // console.log('TRANSLATE',{start, end})
+		  // my goal here is to output position indexes, I'm supplied ts
 		  const translated =  {
-			  start: [start === null ? start : xAccessor(start), trend.start[1]],
-			  end: [end === null ? end : xAccessor(end), trend.end[1]],
+			  start: [startIndex, trend.start[1]],
+			  end: [endIndex, trend.end[1]],
 			  appearance,
 			  type,
 		  }
-		  // console.log('start end translated:',{translated})
+			  console.log({startIndex})
+		  console.log('start end translated:',{translated})
 		  return translated
 	  }
 
@@ -209,7 +282,7 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 		  </Chart>
         <Chart id={1}
             yExtents={[d => [d.high, d.low]]}
-			padding={{ top: 40, bottom: 20 }}>
+			padding={{ top: 20, bottom: 40 }}>
 
 		  <OHLCTooltip origin={[-40, 0]} textFill={OFFWHITE}/>
           <XAxis axisAt="bottom" orient="bottom" ticks={13} tickStroke={OFFWHITE} {...xGrid} />
@@ -243,6 +316,7 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 			// snapTo={d => [d.high, d.low]}
 			// onStart={() => console.log('Trendline start drag')}
 			onComplete={this.onDrawCompleteChart1}
+			// trends={this.state.trends_1}
 			trends={this.state.trends_1.map(translateTrends)}
 		/>
 

@@ -56,7 +56,7 @@ export function useRealtimeData({exchange, to, from}, dispatch) {
 			console.log({price, volume})
 			if (price || volume) {
 				// const diff = (now - lastTrade) / 1000
-				lastTrade = now
+				// lastTrade = now
 				// console.log('trade update', update)
 				// console.log(`Trade:${p} Last:${diff}`)
 				dispatch({type: 'SOCKET_PRICE_UPDATE', payload: update, exchange, from, to})
@@ -114,10 +114,35 @@ export function useCandleReducer(infoString, initialState = {}) {
 			case "SOCKET_PRICE_UPDATE":
 				console.log('update payload', {payload})
 				console.log('IN SOCKET UPDATE',{state})
-				const { price, volume } = payload
+				const { price, volume, ts } = payload
 				if (state.allTs && state.allTs.length > 0) {
 					const lastTs = state.allTs.slice(0).pop()
 					let  lastBar = {...candleData[lastTs]}
+					console.log('state resolutionsec',state.allTs[0])
+					const resolutionSec = state.allTs[state.allTs.length - 1] - state.allTs[state.allTs.length - 2]
+					console.log({resolutionSec})
+					const rounded = Math.floor(ts / resolutionSec) * resolutionSec
+					console.log({lastTs, rounded})
+					if (lastTs < rounded) {
+						console.log('lastTs < rounded', lastTs,  rounded)
+						// create a new bar
+						console.log({price})
+						const newBar = {
+							date: new Date(rounded * 1000),
+							open: lastBar.close,
+							high: price ? Math.max(lastBar.close, price) : lastBar.close,
+							low: price ? Math.min(lastBar.close, price) : lastBar.close,
+							close: price || lastBar.close,
+							volume: volume
+						}
+						console.log('new bar in reducer!', newBar)
+						return {
+							...state,
+							candleData: { ...candleData, [rounded]: newBar},
+							allTs: state.allTs.concat([rounded])
+						}
+					} else {
+
 					if (price) {
 						if (price < lastBar.low) {
 							lastBar.low = price
@@ -135,6 +160,7 @@ export function useCandleReducer(infoString, initialState = {}) {
 						candleData: {...candleData, [lastTs]: lastBar }
 					}
 					return newState
+					}
 
 				} else {
 					return state
