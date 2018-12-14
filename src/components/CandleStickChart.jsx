@@ -40,8 +40,8 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 	constructor(props) {
 		super()
 		const { data } = props
-		const range = 180
-		const rightOffset = 10
+		const range = 100
+		const rightOffset = 5
 		// const xExtents = [data.length -1, Math.max(0, data.length - range)]
 		const xExtents = [data.length + rightOffset, Math.max(0, data.length - range)]
 		this.xExtents = xExtents
@@ -306,7 +306,7 @@ function floorDate(date, coeff) {
 			wickStroke={blackOrRed}
 			fill={blackOrRed}
 			opacity={1}
-			widthRatio={0.8}
+			widthRatio={0.75}
 		/>
 		<TrendLine 
 			ref={this.saveInteractiveNodes("Trendline", 1)}
