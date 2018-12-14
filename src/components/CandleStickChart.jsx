@@ -17,7 +17,8 @@ import {
   CrossHairCursor,
 	MouseCoordinateX,
 	EdgeIndicator,
-  MouseCoordinateY,
+	MouseCoordinateY,
+	PriceCoordinate,
 } from "react-stockcharts/lib/coordinates";
 
 import { OHLCTooltip } from "react-stockcharts/lib/tooltip";
@@ -42,6 +43,8 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 		const { data } = props
 		const range = 100
 		const rightOffset = 5
+		const lastBar = data[data.length - 1]
+		const lastBarTs = Math.floor(lastBar.date.getTime() / 1000)
 		// const xExtents = [data.length -1, Math.max(0, data.length - range)]
 		const xExtents = [data.length + rightOffset, Math.max(0, data.length - range)]
 		this.xExtents = xExtents
@@ -61,13 +64,13 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 			  type: "LINE"
 		
 		},
-			// {
-			//   start: [1543935600, 4035.10],
-			//   end: [1544457600, 3523.25],
-			//   appearance: {stroke: "red", strokeWidth: 2},
-			//   type: "LINE"
+			{
+			  start: [1543935600, 4035.10],
+			  end: [1544457600, 3523.25],
+			  appearance: {stroke: "green", strokeWidth: 2},
+			  type: "LINE"
 		
-		// },
+		},
 		]
 		this.state = {
 			enableTrendLine: false,
@@ -320,11 +323,23 @@ function floorDate(date, coeff) {
 			trends={this.state.trends_1.map(translateTrends)}
 		/>
 
+	<PriceCoordinate 
+		at="right"
+		orient="right"
+		price={data[data.length - 1].close}
+		displayFormat={format(".2f")}
+		stroke={blackOrRed(data[data.length - 1])}
+		fill={blackOrRed(data[data.length -1])}
+		lineStroke={blackOrRed(data[data.length - 1])}
+		strokeDasharray="ShortDash"
+		arrowWidth={7}
+		lineOpacity={0.8}
+	/>
+
 	{/*
 		<ClickCallback 
 			onMouseDown={handleDebugClick}
 		/>
-				*/}
 		<EdgeIndicator 
 			itemType="last"
 			orient="right"
@@ -334,6 +349,7 @@ function floorDate(date, coeff) {
 			lineStroke={blackOrRed}
 			displayFormat={this.priceFormat}
 		/>
+				*/}
         </Chart>
 		<DrawingObjectSelector
 			enabled={!this.state.enableTrendLine}
