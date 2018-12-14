@@ -56,7 +56,7 @@ export function useRealtimeData({exchange, to, from}, dispatch) {
 			console.log({price, volume})
 			if (price || volume) {
 				// const diff = (now - lastTrade) / 1000
-				lastTrade = now
+				// lastTrade = now
 				// console.log('trade update', update)
 				// console.log(`Trade:${p} Last:${diff}`)
 				dispatch({type: 'SOCKET_PRICE_UPDATE', payload: update, exchange, from, to})
@@ -126,15 +126,16 @@ export function useCandleReducer(infoString, initialState = {}) {
 					if (lastTs < rounded) {
 						console.log('lastTs < rounded', lastTs,  rounded)
 						// create a new bar
+						console.log({price})
 						const newBar = {
 							date: new Date(rounded * 1000),
-							open: price,
-							high: price,
-							low: price,
-							close: price,
+							open: lastBar.close,
+							high: price ? Math.max(lastBar.close, price) : lastBar.close,
+							low: price ? Math.min(lastBar.close, price) : lastBar.close,
+							close: price || lastBar.close,
 							volume: volume
 						}
-						console.log('new bar in reducer!')
+						console.log('new bar in reducer!', newBar)
 						return {
 							...state,
 							candleData: { ...candleData, [rounded]: newBar},
