@@ -39,9 +39,14 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 	constructor(props) {
 		super()
 		const { data } = props
-		const offset = 130
-		const xExtents = [xAccessor(data[data.length -1]), xAccessor(data[Math.max(0, data.length - offset)])]
+		const range  = 180
+		const offset = 15
+		const xExtents = [xAccessor(data[data.length -1]), xAccessor(data[Math.max(0, data.length - range)])]
 		// const xExtents = [xAccessor(data[data.length -1]), {date: new Date(1544752647000)}]
+		// console.log({data})
+		// const range = 180
+		// const rightOffset = 10
+		// const xAccessor = datum => {console.log({datum});return datum && datum.date}
 		this.xExtents = xExtents
 		this.priceFormat = props.data[0].close > 1 ? twoFixed : eightFixed
 		const trends_1 = [
@@ -111,7 +116,6 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 			const startDate = trend.start[0].getTime() / 1000
 			const endDate = trend.end[0].getTime() / 1000
 			// console.log({startCandle, endCandle})
-			// console.log({startDate, endDate})
 			const newTrend = {
 				...trend,
 				start: [startDate, trend.start[1]],
@@ -119,7 +123,6 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 			}
 			// console.log('startdate',{newTrend})
 			return newTrend
-			return trend
 		})
 		this.setState({
 			enableTrendLine: false,
@@ -128,22 +131,8 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
   }
   render() {
 	  const { type, data, width, height, ratio, onLoadMore } = this.props;
-	  const interval  = data[1].date.getTime() - data[0].date.getTime()
-	  console.log({interval})
-	  const newest = last(data)
-	  const blanks = getNewDates(newest.date, interval)
-	  console.log({blanks})
-
-	  function getNewDates(from, interval) {
-		  const n = 100
-		  const newDates = []
-		  for (let i = 1; i < n + 1; i++) {
-			  const date = new Date(from + (interval * i))
-			  newDates.push({date, open: 0, high: 0, low: 0, close: 0})
-		  }
-		  return newDates
-	  }
 	  const xScale = scaleTime()
+	  const xAccessor = datum => datum && datum.date
 	  // const xScaleProvider = discontinuousTimeScaleProvider
 		  // .inputDateAccessor(d => d.date)
 	  // const {
@@ -172,23 +161,20 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 	  // regardless, I need dates to be able to pin the lines to
 
 	  const translateTrends = trend => {
+		  console.log('translate this trend', trend)
 		  const { type, appearance } = trend
-		  // const [start] = data.filter(d => (d.date.getTime() / 1000) === trend.start[0])
-		  // const start = data.filter(d => (d.date.getTime() / 1000) <=  trend.start[0]).pop()
-		  // const end = data.filter(d => (d.date.getTime() / 1000) <=  trend.end[0]).pop()
 		  const start = data.filter(d => (d.date.getTime() / 1000) <=  trend.start[0]).pop()
 		  const end = data.filter(d => (d.date.getTime() / 1000) <=  trend.end[0]).pop()
+		  console.log('TRANSLATE',{start, end})
 		  const translated =  {
 			  start: [start === null ? start : xAccessor(start), trend.start[1]],
 			  end: [end === null ? end : xAccessor(end), trend.end[1]],
 			  appearance,
 			  type,
 		  }
-		  console.log('start end translated:',{translated})
+		  console.log('start end translated trends:',{translated})
 		  return translated
 	  }
-	  const dataJoin = data.concat(blanks)
-	  console.log({dataJoin})
 
     return (
 		<ChartCanvas height={height}
@@ -198,7 +184,7 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
           margin={margin}
           type={type}
 		  seriesName="BTC/USD:Coinbase"
-          data={dataJoin}
+          data={data}
           xScale={xScale}
           xAccessor={xAccessor}
 		  // displayXAccessor={displayXAccessor}
@@ -264,7 +250,6 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 			// snapTo={d => [d.high, d.low]}
 			// onStart={() => console.log('Trendline start drag')}
 			onComplete={this.onDrawCompleteChart1}
-			// trends={this.state.trends_1}
 			trends={this.state.trends_1.map(translateTrends)}
 		/>
 
