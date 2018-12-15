@@ -7,6 +7,18 @@ import { getData } from './utils'
 import { useCandleReducer, useCandleSelector, reduceResolution, useRealtimeData} from './hooks'
 
 const resolutionOptions = [1, 5, 15, 30, 45, 60, 120, 240, 'D', '2D']
+const symbolOptions = [
+	"Coinbase:BTC/USD",
+	"Coinbase:ETH/USD",
+	"Binance:TRX/BTC",
+	"Coinbase:BCH/USD"
+]
+
+function parseSymbol(infoString) {
+		const [exchange, pair]= infoString.split(':')
+		const [from, to] = pair.split("/")
+		return [exchange, from, to]
+}
 
 function App() {
 	const [exchange, setExchange] = useState("Coinbase")
@@ -27,6 +39,15 @@ function App() {
 	console.log({baseInfoString})
 
 	const chartData = useCandleSelector(allTs, candleData, resolution)
+
+	const symbolChange = e => {
+		console.log(e.target.value)
+		// parse this into exchange/from/to@rez?
+		const [exchange, from, to] = parseSymbol(e.target.value)
+		setExchange(exchange)
+		setFrom(from)
+		setTo(to)
+	}
 
 	const onSelectChange = e => setResolution(e.target.value)
 	const onLoadMore = async (start, end) => {
@@ -59,6 +80,17 @@ function App() {
 			<h2 className="title-pair">
 			{ infoString }
 			</h2>
+		<select
+			className="pair-selector"
+			name="pair"
+			value={`${exchange}:${from}/${to}`}
+			onChange={symbolChange}
+		>
+			{
+			symbolOptions.map(
+				e => <option key={e} value={e} >{e}</option>)
+			}
+		</select>
 		<select
 			className="resolution-selector"
 			name="resolution"

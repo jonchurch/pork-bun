@@ -70,6 +70,8 @@ export function useRealtimeData({exchange, to, from}, dispatch) {
 		}
 
 		return () => {
+			console.log('run teardown of listener', {exchange, to, from})
+			socket.removeListener('m', handleSocketEvent)
 			socket.emit('SubRemove', {subs: [currentPriceSub, tradeSub]})
 		}
 	}, [exchange, to, from])
