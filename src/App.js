@@ -40,7 +40,7 @@ function App() {
 	console.log({baseInfoString})
 
 	const chartData = useCandleSelector(allTs, candleData, resolution)
-	const lastPrice = chartData.length ? chartData[chartData.length - 1].close : null
+	const lastPrice = chartData.length ? chartData[chartData.length - 1].close : ''
 	useEffect(() => {
 		document.title = `${from}/${to}: ${lastPrice} `
 	}, [lastPrice, from, to])

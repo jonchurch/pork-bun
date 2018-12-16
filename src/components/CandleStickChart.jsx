@@ -39,7 +39,8 @@ const eightFixed = format(".8f")
 const twoFixed = format(".2f")
 class CandleStickChartForContinuousIntraDay extends React.Component {
 	constructor(props) {
-		super()
+		super(props)
+		console.log('chart constructor running', this.props)
 		const { data } = props
 		const range = 100
 		const rightOffset = 5

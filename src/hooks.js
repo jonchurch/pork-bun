@@ -104,8 +104,13 @@ export function useCandleReducer(infoString, initialState = {}) {
 					}
 				}
 				const newData  = payload.reduce((a, b) => {a[b.date.getTime() / 1000] = b; return a}, {})
+				const mergedData = {...candleData, ...newData}
 				console.log({newData})
-				const allTs = payload.map(i => i.date.getTime() / 1000).concat(state.allTs)
+				// const allTs = payload.map(i => i.date.getTime() / 1000).concat(state.allTs)
+				const allTs = Object.keys(mergedData)
+				//  the above is no good because it would add duplicate ids to the array, its just concating old and new
+				//  I mean I could use a Set...
+
 				allTs.sort((a, b) => a - b)
 				return {
 					...state,
