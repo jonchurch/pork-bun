@@ -1,4 +1,4 @@
-import React, { useState, useReducer, useMemo } from 'react';
+import React, { useState, useReducer, useMemo, useEffect } from 'react';
 
 import './App.css';
 import CandleStickChart from './components/CandleStickChart'
@@ -36,9 +36,14 @@ function App() {
 
 	useRealtimeData({exchange, to, from}, dispatch)
 
+
 	console.log({baseInfoString})
 
 	const chartData = useCandleSelector(allTs, candleData, resolution)
+	const lastPrice = chartData.length ? chartData[chartData.length - 1].close : null
+	useEffect(() => {
+		document.title = `${from}/${to}: ${lastPrice} `
+	}, [lastPrice, from, to])
 
 	const symbolChange = e => {
 		console.log(e.target.value)
