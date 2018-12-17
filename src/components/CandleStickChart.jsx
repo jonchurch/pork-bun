@@ -65,13 +65,13 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 			  type: "LINE"
 		
 		},
-			{
-			  start: [1543935600, 4035.10],
-			  end: [1544457600, 3523.25],
-			  appearance: {stroke: "green", strokeWidth: 2},
-			  type: "LINE"
+			// {
+			//   start: [1543935600, 4035.10],
+			//   end: [1544457600, 3523.25],
+			//   appearance: {stroke: "green", strokeWidth: 2},
+			//   type: "LINE"
 		
-		},
+		// },
 		]
 		this.state = {
 			enableTrendLine: false,
@@ -127,7 +127,7 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 			console.log({resolution})
 			// we need to convert an index into a future date we can store a ts for the trend xy
 			const lastBar = this.props.data[this.props.data.length - 1]
-			const intervalsIntoFuture = trend.start[0] - this.props.data.length
+			const intervalsIntoFuture = trend.start[0] - this.props.data.length + 1
 			const msToAdd = (intervalsIntoFuture * resolution) * 1000
 			const newFutureDate = new Date(lastBar.date.getTime() + msToAdd).getTime() / 1000
 			console.log({newFutureDate})
@@ -138,7 +138,9 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 				: 
 				newFutureDate
 				
-			const _intervalsIntoFuture = trend.end[0] - this.props.data.length
+			const _intervalsIntoFuture = trend.end[0] - this.props.data.length + 1
+			console.log('start',{intervalsIntoFuture})
+			// console.log('end',{_intervalsIntoFuture})
 			const _msToAdd = (_intervalsIntoFuture * resolution) * 1000
 			const _newFutureDate = new Date(lastBar.date.getTime() + _msToAdd).getTime() / 1000
 			const endDate = endCandle ? 
