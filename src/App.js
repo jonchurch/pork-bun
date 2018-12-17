@@ -1,4 +1,4 @@
-import React, { useState, useReducer, useMemo } from 'react';
+import React, { useState, useReducer, useMemo, useEffect } from 'react';
 
 import './App.css';
 import CandleStickChart from './components/CandleStickChart'
@@ -7,6 +7,22 @@ import { getData } from './utils'
 import { useCandleReducer, useCandleSelector, reduceResolution, useRealtimeData} from './hooks'
 
 const resolutionOptions = [1, 5, 15, 30, 45, 60, 120, 240, 'D', '2D']
+const symbolOptions = [
+	"Coinbase:BTC/USD",
+	"Coinbase:ETH/USD",
+	"Binance:TRX/BTC",
+	"Coinbase:BCH/USD",
+	"Cryptopia:LTC/BTC",
+	"Cryptopia:LUX/BTC",
+	"Cryptopia:LPC*/BTC",
+	"Cryptopia:SMART/BTC",
+]
+
+function parseSymbol(infoString) {
+		const [exchange, pair]= infoString.split(':')
+		const [from, to] = pair.split("/")
+		return [exchange, from, to]
+}
 
 function App() {
 	const [exchange, setExchange] = useState("Coinbase")
@@ -24,17 +40,34 @@ function App() {
 
 	useRealtimeData({exchange, to, from}, dispatch)
 
+
 	console.log({baseInfoString})
 
 	const chartData = useCandleSelector(allTs, candleData, resolution)
+	const lastPrice = chartData.length ? chartData[chartData.length - 1].close : ''
+	useEffect(() => {
+		document.title = `${from}/${to}: ${lastPrice} `
+	}, [lastPrice, from, to])
+
+	const symbolChange = e => {
+		console.log(e.target.value)
+		// parse this into exchange/from/to@rez?
+		const [exchange, from, to] = parseSymbol(e.target.value)
+		setExchange(exchange)
+		setFrom(from)
+		setTo(to)
+	}
 
 	const onSelectChange = e => setResolution(e.target.value)
+
 	const onLoadMore = async (start, end) => {
 		if (loading || !canLoadMore) {
 			return 
 		}
+		console.log('loadmore',{start, end})
 		dispatch({type: 'REQUEST_CANDLES', id: baseInfoString})
-		const lastBarTs = allTs[0]
+		const lastBarTs = allTs[0] - (allTs[1] - allTs[0]) 
+		console.log({lastBarTs})
 		const payload = await getData({exchange, to, from, resolution, start: lastBarTs})
 		dispatch({type: "RECEIVE_CANDLES", id: baseInfoString, payload})
 
@@ -59,6 +92,17 @@ function App() {
 			<h2 className="title-pair">
 			{ infoString }
 			</h2>
+		<select
+			className="pair-selector"
+			name="pair"
+			value={`${exchange}:${from}/${to}`}
+			onChange={symbolChange}
+		>
+			{
+			symbolOptions.map(
+				e => <option key={e} value={e} >{e}</option>)
+			}
+		</select>
 		<select
 			className="resolution-selector"
 			name="resolution"

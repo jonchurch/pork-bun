@@ -37,8 +37,14 @@ function parseCCData({Data: data}) {
 	return parsed
 }
 
+const filterEmptyBars = bars => bars.filter(d => {
+	const total = d.close + d.high + d.open + d.low + d.volume
+	return total > 0
+})
+
+
 export function getData({exchange, to, from, resolution, start}) {
-	// console.log(exchange, to, from, resolution, start)
+	console.log("========",exchange, to, from, resolution, start)
 	if (resolution.includes("D")) {
 		// resolution = resolution === "2D" ? 172800 : 86400
 		resolution = "histoday"
@@ -49,6 +55,7 @@ export function getData({exchange, to, from, resolution, start}) {
 		.then(response => response.json())
 		.then(res => {
 			console.log({res})
+
 			if (! res.Data.length) {
 				console.error(new Error(res.Message))
 				// return 
@@ -56,6 +63,7 @@ export function getData({exchange, to, from, resolution, start}) {
 			return res
 		})
 		.then(parseCCData)
+		.then(bars => filterEmptyBars(bars))
 		.then(data => {
 			console.log('got data from api:', {data})
 			data.sort((a, b) => {

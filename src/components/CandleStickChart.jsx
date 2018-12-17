@@ -39,7 +39,8 @@ const eightFixed = format(".8f")
 const twoFixed = format(".2f")
 class CandleStickChartForContinuousIntraDay extends React.Component {
 	constructor(props) {
-		super()
+		super(props)
+		console.log('chart constructor running', this.props)
 		const { data } = props
 		const range = 100
 		const rightOffset = 5
@@ -48,7 +49,6 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 		// const xExtents = [data.length -1, Math.max(0, data.length - range)]
 		const xExtents = [data.length + rightOffset, Math.max(0, data.length - range)]
 		this.xExtents = xExtents
-		this.priceFormat = props.data[0].close > 1 ? twoFixed : eightFixed
 		const trends_1 = [
 			// {
 			//   start: [300, 7000],
@@ -64,13 +64,13 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 			  type: "LINE"
 		
 		},
-			{
-			  start: [1543935600, 4035.10],
-			  end: [1544457600, 3523.25],
-			  appearance: {stroke: "green", strokeWidth: 2},
-			  type: "LINE"
+			// {
+			//   start: [1543935600, 4035.10],
+			//   end: [1544457600, 3523.25],
+			//   appearance: {stroke: "green", strokeWidth: 2},
+			//   type: "LINE"
 		
-		},
+		// },
 		]
 		this.state = {
 			enableTrendLine: false,
@@ -126,7 +126,7 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 			console.log({resolution})
 			// we need to convert an index into a future date we can store a ts for the trend xy
 			const lastBar = this.props.data[this.props.data.length - 1]
-			const intervalsIntoFuture = trend.start[0] - this.props.data.length
+			const intervalsIntoFuture = trend.start[0] - this.props.data.length + 1
 			const msToAdd = (intervalsIntoFuture * resolution) * 1000
 			const newFutureDate = new Date(lastBar.date.getTime() + msToAdd).getTime() / 1000
 			console.log({newFutureDate})
@@ -137,7 +137,9 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 				: 
 				newFutureDate
 				
-			const _intervalsIntoFuture = trend.end[0] - this.props.data.length
+			const _intervalsIntoFuture = trend.end[0] - this.props.data.length + 1
+			console.log('start',{intervalsIntoFuture})
+			// console.log('end',{_intervalsIntoFuture})
 			const _msToAdd = (_intervalsIntoFuture * resolution) * 1000
 			const _newFutureDate = new Date(lastBar.date.getTime() + _msToAdd).getTime() / 1000
 			const endDate = endCandle ? 
@@ -178,6 +180,7 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 	  // const xExtents = [start, end];
 	  // console.log({xExtents})
 
+	  const priceFormat = initialData[0].close > 1 ? twoFixed : eightFixed
 
 	  const margin = { left: 80, right: 80, top: 10, bottom: 30 }
 	  const gridHeight = height - margin.top - margin.bottom;
@@ -289,7 +292,7 @@ function floorDate(date, coeff) {
 
 		  <OHLCTooltip origin={[-40, 0]} textFill={OFFWHITE}/>
           <XAxis axisAt="bottom" orient="bottom" ticks={13} tickStroke={OFFWHITE} {...xGrid} />
-          <YAxis axisAt="right" tickFormat={this.priceFormat} orient="right" ticks={12} tickStroke={OFFWHITE} {...yGrid} />
+          <YAxis axisAt="right" tickFormat={priceFormat} orient="right" ticks={12} tickStroke={OFFWHITE} {...yGrid} />
 
           <MouseCoordinateX
             rectWidth={80}
@@ -300,7 +303,7 @@ function floorDate(date, coeff) {
           <MouseCoordinateY
             at="right"
             orient="left"
-			displayFormat={this.priceFormat} 
+			displayFormat={priceFormat} 
 		/>
 
 	
@@ -327,7 +330,7 @@ function floorDate(date, coeff) {
 		at="right"
 		orient="right"
 		price={data[data.length - 1].close}
-		displayFormat={format(".2f")}
+		displayFormat={priceFormat}
 		stroke={blackOrRed(data[data.length - 1])}
 		fill={blackOrRed(data[data.length -1])}
 		lineStroke={blackOrRed(data[data.length - 1])}
@@ -347,7 +350,7 @@ function floorDate(date, coeff) {
 			yAccessor={d => d.close}
 			fill={blackOrRed}
 			lineStroke={blackOrRed}
-			displayFormat={this.priceFormat}
+			displayFormat={priceFormat}
 		/>
 				*/}
         </Chart>
