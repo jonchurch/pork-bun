@@ -11,7 +11,11 @@ const symbolOptions = [
 	"Coinbase:BTC/USD",
 	"Coinbase:ETH/USD",
 	"Binance:TRX/BTC",
-	"Coinbase:BCH/USD"
+	"Coinbase:BCH/USD",
+	"Cryptopia:LTC/BTC",
+	"Cryptopia:LUX/BTC",
+	"Cryptopia:LPC*/BTC",
+	"Cryptopia:SMART/BTC",
 ]
 
 function parseSymbol(infoString) {
@@ -55,12 +59,15 @@ function App() {
 	}
 
 	const onSelectChange = e => setResolution(e.target.value)
+
 	const onLoadMore = async (start, end) => {
 		if (loading || !canLoadMore) {
 			return 
 		}
+		console.log('loadmore',{start, end})
 		dispatch({type: 'REQUEST_CANDLES', id: baseInfoString})
-		const lastBarTs = allTs[0]
+		const lastBarTs = allTs[0] - (allTs[1] - allTs[0]) 
+		console.log({lastBarTs})
 		const payload = await getData({exchange, to, from, resolution, start: lastBarTs})
 		dispatch({type: "RECEIVE_CANDLES", id: baseInfoString, payload})
 
