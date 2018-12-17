@@ -49,7 +49,6 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 		// const xExtents = [data.length -1, Math.max(0, data.length - range)]
 		const xExtents = [data.length + rightOffset, Math.max(0, data.length - range)]
 		this.xExtents = xExtents
-		this.priceFormat = props.data[0].close > 1 ? twoFixed : eightFixed
 		const trends_1 = [
 			// {
 			//   start: [300, 7000],
@@ -181,6 +180,7 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 	  // const xExtents = [start, end];
 	  // console.log({xExtents})
 
+	  const priceFormat = initialData[0].close > 1 ? twoFixed : eightFixed
 
 	  const margin = { left: 80, right: 80, top: 10, bottom: 30 }
 	  const gridHeight = height - margin.top - margin.bottom;
@@ -292,7 +292,7 @@ function floorDate(date, coeff) {
 
 		  <OHLCTooltip origin={[-40, 0]} textFill={OFFWHITE}/>
           <XAxis axisAt="bottom" orient="bottom" ticks={13} tickStroke={OFFWHITE} {...xGrid} />
-          <YAxis axisAt="right" tickFormat={this.priceFormat} orient="right" ticks={12} tickStroke={OFFWHITE} {...yGrid} />
+          <YAxis axisAt="right" tickFormat={priceFormat} orient="right" ticks={12} tickStroke={OFFWHITE} {...yGrid} />
 
           <MouseCoordinateX
             rectWidth={80}
@@ -303,7 +303,7 @@ function floorDate(date, coeff) {
           <MouseCoordinateY
             at="right"
             orient="left"
-			displayFormat={this.priceFormat} 
+			displayFormat={priceFormat} 
 		/>
 
 	
@@ -330,7 +330,7 @@ function floorDate(date, coeff) {
 		at="right"
 		orient="right"
 		price={data[data.length - 1].close}
-		displayFormat={this.priceFormat}
+		displayFormat={priceFormat}
 		stroke={blackOrRed(data[data.length - 1])}
 		fill={blackOrRed(data[data.length -1])}
 		lineStroke={blackOrRed(data[data.length - 1])}
@@ -350,7 +350,7 @@ function floorDate(date, coeff) {
 			yAccessor={d => d.close}
 			fill={blackOrRed}
 			lineStroke={blackOrRed}
-			displayFormat={this.priceFormat}
+			displayFormat={priceFormat}
 		/>
 				*/}
         </Chart>
