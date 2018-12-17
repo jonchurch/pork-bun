@@ -328,7 +328,7 @@ function floorDate(date, coeff) {
 		at="right"
 		orient="right"
 		price={data[data.length - 1].close}
-		displayFormat={format(".2f")}
+		displayFormat={this.priceFormat}
 		stroke={blackOrRed(data[data.length - 1])}
 		fill={blackOrRed(data[data.length -1])}
 		lineStroke={blackOrRed(data[data.length - 1])}
