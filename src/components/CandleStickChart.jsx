@@ -10,6 +10,7 @@ import {
 	CandlestickSeries,
 	VolumeProfileSeries,
 	BarSeries,
+	MACDSeries,
 } from "react-stockcharts/lib/series";
 import { TrendLine, ClickCallback, DrawingObjectSelector } from 'react-stockcharts/lib/interactive'
 import { XAxis, YAxis } from "react-stockcharts/lib/axes";
@@ -20,6 +21,7 @@ import {
 	MouseCoordinateY,
 	PriceCoordinate,
 } from "react-stockcharts/lib/coordinates";
+import { macd } from 'react-stockcharts/lib/indicator'
 
 import { OHLCTooltip } from "react-stockcharts/lib/tooltip";
 import { fitWidth } from "react-stockcharts/lib/helper";
@@ -37,18 +39,39 @@ function blackOrRed(d) {
 }
 const eightFixed = format(".8f")
 const twoFixed = format(".2f")
+
+const macdAppearance = {
+	stroke: {
+		macd: "orange",
+		signal: "blue"
+	},
+	fill: {
+		divergence: ({ macd }) => macd.divergence > 0 ? 'green' : 'red'
+	}
+}
+
+const macdCalculator = macd()
+	.options({
+		fast: 12,
+		slow: 26,
+		signal: 9
+	})
+	.merge((d, c) => {d.macd = c})
+	.accessor(d => d.macd)
+
 class CandleStickChartForContinuousIntraDay extends React.Component {
 	constructor(props) {
 		super(props)
 		console.log('chart constructor running', this.props)
-		const { data } = props
+		const { data} = props
 		const range = 100
-		const rightOffset = 5
+		// const rightOffset = 5
 		const lastBar = data[data.length - 1]
 		const lastBarTs = Math.floor(lastBar.date.getTime() / 1000)
 		// const xExtents = [data.length -1, Math.max(0, data.length - range)]
-		const xExtents = [data.length + rightOffset, Math.max(0, data.length - range)]
-		this.xExtents = xExtents
+		// const xExtents = [data.length + rightOffset, Math.max(0, data.length - range)]
+		// this.xExtents = xExtents
+		this.setXExtents(data, 100, 5)
 		const trends_1 = [
 			// {
 			//   start: [300, 7000],
@@ -58,8 +81,15 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 		
 		// },
 			{
-			  start: [1545116041, 7000],
-			  end: [1543449600, 7000],
+			  start: [1545116041, 5000],
+			  end: [1543449600, 5000],
+			  appearance: {stroke: "red", strokeWidth: 2},
+			  type: "LINE"
+		
+		},
+			{
+			  start: [1545116041, 115],
+			  end: [1543449600, 115],
 			  appearance: {stroke: "red", strokeWidth: 2},
 			  type: "LINE"
 		
@@ -78,7 +108,20 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 			trends_3: [],
 		}
 	}
-
+	componentWillReceiveProps({ resolution, data }) {
+		if (resolution !== this.props.resolution) {
+			// this feels so wrong for some reason
+			// I should probably be dealing with state instead of prototypes for xExtents
+			// I can't put my finger on it, but this feels very non-declarative
+			console.log('new resolution data length:', data.length)
+			console.log('old data length:', this.props.data.length)
+			console.log('New resolution prop!', resolution, this.props.resolution)
+			this.setXExtents(data, 100, 5)
+		}
+	}
+	setXExtents = (data, range = 100, rightOffset = 0) => {
+		this.xExtents = [data.length + rightOffset, Math.max(0, data.length - range)]
+	}
 	getInteractiveNodes = () => {
 		// console.log('GETTING INTERACTIVE NODES:', this.interactiveNodes)
 		return this.interactiveNodes
@@ -162,8 +205,10 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 			trends_1: newTrends
 		});
   }
-  render() {
+	render() {
+		console.log('xExtents:', this.xExtents)
 	  const { type, data: initialData, width, height, ratio, onLoadMore } = this.props;
+	  const calculatedData = macdCalculator(initialData)
 	  const xScaleProvider = discontinuousTimeScaleProvider
 		  .inputDateAccessor(d => d.date)
 	  const {
@@ -171,7 +216,7 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 		  xScale,
 		  xAccessor,
 		  displayXAccessor
-	  } = xScaleProvider(initialData)
+	  } = xScaleProvider(calculatedData)
 	  // console.log('whole state in render:', this.state)
 	  // const start = xAccessor(last(data));
 	  // const offset = 130
@@ -180,7 +225,7 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 	  // const xExtents = [start, end];
 	  // console.log({xExtents})
 
-	  const priceFormat = initialData[0].close > 1 ? twoFixed : eightFixed
+	  const priceFormat = calculatedData[0].close > 1 ? twoFixed : eightFixed
 
 	  const margin = { left: 80, right: 80, top: 10, bottom: 30 }
 	  const gridHeight = height - margin.top - margin.bottom;
@@ -266,7 +311,7 @@ function floorDate(date, coeff) {
 		  <Chart id={2}
 			  yExtents={[d => d.volume]}
 			  height={100}
-			  origin={(w,h) => [0, h - 100]}
+			  origin={(w,h) => [0, h - 260]}
 		  >
 			  {/*
 			  <YAxis 
@@ -288,18 +333,23 @@ function floorDate(date, coeff) {
 		  </Chart>
         <Chart id={1}
             yExtents={[d => [d.high, d.low]]}
-			padding={{ top: 20, bottom: 40 }}>
+			padding={{ top: 20, bottom: 40 }}
+			height={475}
+		>
 
 		  <OHLCTooltip origin={[-40, 0]} textFill={OFFWHITE}/>
-          <XAxis axisAt="bottom" orient="bottom" ticks={13} tickStroke={OFFWHITE} {...xGrid} />
+		  {/* 
+		  <XAxis axisAt="bottom" orient="bottom" ticks={13} tickStroke={OFFWHITE} {...xGrid} /> 
+				  */}
           <YAxis axisAt="right" tickFormat={priceFormat} orient="right" ticks={12} tickStroke={OFFWHITE} {...yGrid} />
 
-          <MouseCoordinateX
+		  {/* <MouseCoordinateX
             rectWidth={80}
             at="bottom"
             orient="bottom"
 			displayFormat={timeFormat("%d/%m %H:%M")} 
 		/>
+		*/}
           <MouseCoordinateY
             at="right"
             orient="left"
@@ -353,7 +403,32 @@ function floorDate(date, coeff) {
 			displayFormat={priceFormat}
 		/>
 				*/}
-        </Chart>
+			</Chart>
+			<Chart
+				id={3}
+				height={150}
+				yExtents={macdCalculator.accessor()}
+				origin={ (w, h) => [0, h - 150]}
+				padding={{ top: 10, bottom: 10 }}
+			>		
+				<YAxis axisAt="right" orient="right" ticks={4} tickStroke={OFFWHITE} {...yGrid} />
+				<XAxis axisAt="bottom" orient="bottom" ticks={13} tickStroke={OFFWHITE} {...xGrid} /> 
+				<MACDSeries 
+					yAccessor={d => d.macd} 
+					{...macdAppearance} />
+		  <MouseCoordinateX
+            rectWidth={80}
+            at="bottom"
+            orient="bottom"
+			displayFormat={timeFormat("%d/%m %H:%M")} 
+		/>
+          <MouseCoordinateY
+            at="right"
+            orient="left"
+			displayFormat={priceFormat} 
+		/>
+
+			</Chart>
 		<DrawingObjectSelector
 			enabled={!this.state.enableTrendLine}
 			getInteractiveNodes={this.getInteractiveNodes}
