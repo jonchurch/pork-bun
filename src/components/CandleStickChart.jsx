@@ -204,7 +204,13 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 			// trends_1,
 			trends_1: newTrends
 		});
-  }
+	}
+
+	handlePanEnd = (moreProps, event) => {
+		console.log('pan',{moreProps})
+		// const { xAccessor, xScale, fullData}
+
+	}
 	render() {
 		console.log('xExtents:', this.xExtents)
 	  const { type, data: initialData, width, height, ratio, onLoadMore } = this.props;
@@ -335,6 +341,7 @@ function floorDate(date, coeff) {
             yExtents={[d => [d.high, d.low]]}
 			padding={{ top: 20, bottom: 40 }}
 			height={475}
+		  onPanEnd={this.handlePanEnd}
 		>
 
 		  <OHLCTooltip origin={[-40, 0]} textFill={OFFWHITE}/>
@@ -389,10 +396,11 @@ function floorDate(date, coeff) {
 		lineOpacity={0.8}
 	/>
 
-	{/*
 		<ClickCallback 
 			onMouseDown={handleDebugClick}
+			onPanEnd={this.handlePanEnd}
 		/>
+	{/*
 		<EdgeIndicator 
 			itemType="last"
 			orient="right"
