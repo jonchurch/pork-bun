@@ -233,7 +233,7 @@ class CandleStickChartForContinuousIntraDay extends React.Component {
 
 	  const priceFormat = calculatedData[0].close > 1 ? twoFixed : eightFixed
 
-	  const margin = { left: 80, right: 80, top: 10, bottom: 30 }
+	  const margin = { left: 0, right: 80, top: 10, bottom: 30 }
 	  const gridHeight = height - margin.top - margin.bottom;
 	  const gridWidth = width - margin.left - margin.right;
 	  const showGrid = true;
@@ -344,7 +344,7 @@ function floorDate(date, coeff) {
 		  onPanEnd={this.handlePanEnd}
 		>
 
-		  <OHLCTooltip origin={[-40, 0]} textFill={OFFWHITE}/>
+		  <OHLCTooltip origin={[0, 0]} textFill={OFFWHITE}/>
 		  {/* 
 		  <XAxis axisAt="bottom" orient="bottom" ticks={13} tickStroke={OFFWHITE} {...xGrid} /> 
 				  */}
@@ -419,7 +419,7 @@ function floorDate(date, coeff) {
 				origin={ (w, h) => [0, h - 150]}
 				padding={{ top: 10, bottom: 10 }}
 			>		
-				<YAxis axisAt="right" orient="right" ticks={4} tickStroke={OFFWHITE} {...yGrid} />
+				<YAxis axisAt="right" orient="right" ticks={3} tickStroke={OFFWHITE} {...yGrid} />
 				<XAxis axisAt="bottom" orient="bottom" ticks={13} tickStroke={OFFWHITE} {...xGrid} /> 
 				<MACDSeries 
 					yAccessor={d => d.macd} 

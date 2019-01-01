@@ -1,7 +1,14 @@
+/* Dark primary #131722 */
+/* Light primary #1E2028 */
 
 body {
-	background-color: #131722;
+	background-color: #151826;
 }
+
+.chart-wrapper {
+	background-color: #1F1F29;
+}
+
 
 .title-pair {
 	display: inline;

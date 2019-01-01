@@ -82,16 +82,16 @@ function App() {
 		console.log({candleData})
 		loadChartData()
 	}
+	
 	console.log({candleData})
 	console.log({allTs})
+	const displayPrice = typeof lastPrice === 'number' ? lastPrice > 10 ? lastPrice.toFixed(2) : lastPrice.toFixed(8) : ''
 
+	const currency = to === "USD" ? "$" : to === "BTC" ? "BTC" : ''
 	// const chartData = selectChartData(resolution)
     return (
       <div className="App">
 		<span>
-			<h2 className="title-pair">
-			{ infoString }
-			</h2>
 		<select
 			className="pair-selector"
 			name="pair"
@@ -114,7 +114,11 @@ function App() {
 				e => <option key={e} value={e} >{e}</option>)
 			}
 		</select>
+			<h2 className="title-pair">
+			{ infoString } { displayPrice ? currency + displayPrice : null}
+			</h2>
 		</span>
+		<div className="chart-wrapper">
 		<CandleStickChart
 			type="hybrid"
 			height={675}
@@ -126,6 +130,7 @@ function App() {
 			data={chartData} // should candles be transformed inside or outside chart? prolly reducer side? Selector?
 			onLoadMore={onLoadMore}
 		/>
+		</div>
       </div>
     );
   }
